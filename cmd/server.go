@@ -9,6 +9,7 @@ import (
 var serveCmd = &cobra.Command{
 	Use: "serve",
 	Run: func(cmd *cobra.Command, args []string){
+		LoadConfig()
 		serve();
 	},
 }

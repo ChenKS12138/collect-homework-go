@@ -13,6 +13,7 @@ var (
 var migrateCmd = &cobra.Command{
 	Use: "migrate",
 	Run: func(cmd *cobra.Command,args []string){
+		LoadConfig()
 		argsMig := args[:0]
 		for _, arg := range args {
 			switch arg {

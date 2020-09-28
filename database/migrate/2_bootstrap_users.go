@@ -13,20 +13,19 @@ const deleteUser = `
 `
 
 func init(){
-	viper.AutomaticEnv()
-	password,_ := bcrypt.GenerateFromPassword([]byte(viper.GetString("SUPER_USER_PASSWORD")),10);
-	bootstrapUsers := `
-INSERT INTO admins (is_super_admin,name,email,password)
-VALUES 
-(TRUE,'`+viper.GetString("SUPER_USER_NAME")+`','`+viper.GetString("SUPER_USER_EMAIL")+`','`+string(password)+`');`
-
-	up := []string{
-		bootstrapUsers,
-	};
 	down := []string{
 		deleteUser,
 	}
 	migrations.MustRegisterTx(func(db migrations.DB) error {
+		password,_ := bcrypt.GenerateFromPassword([]byte(viper.GetString("SUPER_USER_PASSWORD")),10);
+		bootstrapUsers := `
+		INSERT INTO admins (is_super_admin,name,email,password)
+		VALUES 
+		(TRUE,'`+viper.GetString("SUPER_USER_NAME")+`','`+viper.GetString("SUPER_USER_EMAIL")+`','`+string(password)+`');`
+
+		up := []string{
+			bootstrapUsers,
+		};
 		fmt.Println("add bootstrap admins")
 		for _, query := range up {
 			_, err := db.Exec(query)

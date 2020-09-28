@@ -16,7 +16,7 @@ func TestSuperAdminAuth(t *testing.T) {
 	err := postRequest(ts.URL+"/admin/login",&struct{
 		Email string `json:"email"`;
 		Password string `json:"password"`;
-	}  {
+	} {
 		Email:viper.GetString("SUPER_USER_EMAIL"),
 		Password: viper.GetString("SUPER_USER_PASSWORD"),
 	},&response)
@@ -26,7 +26,7 @@ func TestSuperAdminAuth(t *testing.T) {
 	}
 
 	if len(response.Data) == 0 {
-		t.Fatal(errors.New("Wrong JWT Token"))
+		t.Fatal(errors.New("Wrong JWT Token"),response)
 	}
 	t.Log("Test Super Admin Auth Pass")
 }

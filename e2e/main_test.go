@@ -5,9 +5,12 @@ import (
 	"collect-homework-go/database/migrate"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -23,9 +26,18 @@ const (
 )
 
 func init(){
+
+	pwd,_ := os.Getwd()
+	viper.SetConfigFile(filepath.Join(pwd,"../.env"))
+	// If a config file is found, read it in.
+	if err := viper.ReadInConfig(); err == nil {
+		fmt.Println("Using config file:", viper.ConfigFileUsed())
+	}
+	viper.AutomaticEnv()
+
+
 	srv,_ := api.NewServer()
 	ts = httptest.NewServer(srv.Handler)
-	viper.AutomaticEnv()
 
 	// clean dababase
 	migrate.Init()

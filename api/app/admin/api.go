@@ -48,7 +48,7 @@ func login(w http.ResponseWriter,r *http.Request) {
 	
 	admin,_ := database.Store.Admin.SelectByEmail(loginDto.Email);
 	if admin == nil {
-		render.Render(w,r,util.ErrBadRequest)
+		render.Render(w,r,ErrAuthorization)
 		return
 	} 
 	

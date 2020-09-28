@@ -1,0 +1,47 @@
+name: e2e-testing
+on: push
+
+jobs:
+  check:
+    name: e2e-testing
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: "^1.14.3"
+      # - uses: Harmon758/postgresql-action@v1.0.0
+      #   with:
+      #     postgresql version: "12"
+      #     postgresql db: "homework"
+      #     postgresql user: "postgres"
+      #     psotgresql password: "postgres"
+      - run: make install && make test-e2e
+        env:
+          DB_NETWORK: tcp
+          DB_ADDR: 127.0.0.1:5432
+          DB_USER: postgres
+          DB_PASSWORD: postgres
+          DB_DATABASE: postgres
+          DB_DEBUG: false
+          STORAGE_PATH_PREFIX: ./
+          SUPER_USER_NAME: admin
+          SUPER_USER_EMAIL: admin@example.com
+          SUPER_USER_PASSWORD: password
