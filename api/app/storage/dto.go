@@ -24,3 +24,15 @@ func (u *UploadDto)validate() error {
 	}
 	return err.Filter()
 }
+
+// DownloadDto downloadDto
+type DownloadDto struct {
+	ID string `json:"id"`
+}
+
+func (d *DownloadDto)validate() error {
+	err := &validation.Errors{
+		"id":validation.Validate(d.ID,validation.Required,is.UUIDv4),
+	}
+	return err.Filter()
+}

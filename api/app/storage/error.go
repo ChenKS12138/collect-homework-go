@@ -36,4 +36,10 @@ var (
 		StatusText: "Storage Error",
 		ErrorText: "File Project Not Exist",
 	}
+	// ErrDownloadForbidden downlaod forbidden
+	ErrDownloadForbidden = &util.ErrResponse{
+		HTTPStatusCode: http.StatusOK,
+		StatusText: "Storage Error",
+		ErrorText: "File Download Forbidden",
+	}
 )

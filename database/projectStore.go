@@ -60,6 +60,20 @@ func (p *ProjectStore)SelectByAdminID(adminID string) (*[]model.ProjectWithAdmin
 	return projects,err
 }
 
+// SelectByAdminIDAndID select by admin id
+func (p *ProjectStore)SelectByAdminIDAndID(adminID string,id string) (*model.ProjectWithAdminName,error) {
+	projects := &model.ProjectWithAdminName{}
+	err := p.db.Model(projects).
+		Where("admin_id = ?",adminID).
+		Where("id = ?",id).
+		Column("id","name","file_name_pattern","file_name_extensions","file_name_example","create_at","update_at").
+		First()
+	if err == pg.ErrNoRows {
+		return nil,nil
+	}
+	return projects,err
+}
+
 // SelectAllUsable select all usable
 func (p *ProjectStore)SelectAllUsable() (*[]model.ProjectWithAdminName,error) {
 	projects := &[]model.ProjectWithAdminName{}

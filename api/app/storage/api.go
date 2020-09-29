@@ -7,7 +7,6 @@ import (
 	"collect-homework-go/model"
 	"collect-homework-go/template"
 	"collect-homework-go/util"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
@@ -165,13 +164,45 @@ func upload(w http.ResponseWriter,r *http.Request){
 }
 
 func download(w http.ResponseWriter,r *http.Request){
+	// 入参检查
 	claim,err := auth.GenerateClaim(r)
 	if err != nil {
 		render.Render(w,r,util.ErrRender(err))
 		return
 	}
-
 	values:= r.URL.Query()
-	projectID := values.Get("id")
-	fmt.Println(projectID,claim)
+	downloadDto := &DownloadDto{
+		ID: values.Get("id"),
+	}
+	if err := downloadDto.validate(); err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+
+	// project 存在性检查
+	project,err := database.Store.Project.SelectByAdminIDAndID(claim.ID,downloadDto.ID)
+	if err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+	if project == nil {
+		render.Render(w,r,ErrDownloadForbidden)
+		return
+	}
+
+	storagePathPrefix := viper.GetString("STORAGE_PATH_PREFIX")
+	fileutil.TouchDirAll(filepath.Join(storagePathPrefix))
+	dirPath := filepath.Join(storagePathPrefix,project.ID)
+	fileutil.TouchDirAll(dirPath)
+	zipFilePath := filepath.Join(storagePathPrefix,project.Name+"-"+string(time.Now().Unix())+".zip")
+	err = util.Zip(zipFilePath,dirPath)
+	if err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+	zipBytes,err := ioutil.ReadFile(zipFilePath)
+	if err != nil {
+		render.Render(w,r,util.ErrRender(err))
+	}
+	render.Data(w,r,zipBytes)
 }
