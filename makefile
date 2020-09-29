@@ -14,8 +14,8 @@ migrate:
 migrate-init:
 	@go run main.go migrate --init --config-file=.env
 
-test-e2e:
-	@go test -v ./e2e
+test:
+	@go test -v ./testing
 
 build:
 	@go build -o ./build/main main.go

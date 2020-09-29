@@ -1,9 +1,9 @@
-name: e2e-testing
+name: testing
 on: push
 
 jobs:
   check:
-    name: e2e-testing
+    name: testing
     runs-on: ubuntu-latest
 
     services:
@@ -33,7 +33,7 @@ jobs:
       #     postgresql db: "homework"
       #     postgresql user: "postgres"
       #     psotgresql password: "postgres"
-      - run: make install && make test-e2e
+      - run: make install && make test
         env:
           DB_NETWORK: tcp
           DB_ADDR: 127.0.0.1:5432

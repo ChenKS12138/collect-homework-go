@@ -1,7 +1,7 @@
 package api_test
 
 import (
-	"collect-homework-go/e2e/service"
+	"collect-homework-go/testing/service"
 	"collect-homework-go/util"
 	"testing"
 )
@@ -26,7 +26,7 @@ func TestSuperAdminProjectInsert(t *testing.T){
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log("Test Super Admin Project Insert Pass")
+	// t.Log("Test Super Admin Project Insert Pass")
 }
 
 // GET /project/
@@ -41,6 +41,6 @@ func TestCommonAdminProjectInsert(t *testing.T){
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log("Test Common Admin Project Insert Pass")
+	// t.Log("Test Common Admin Project Insert Pass")
 }
 

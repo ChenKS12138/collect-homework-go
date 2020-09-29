@@ -2,7 +2,7 @@ package service
 
 import (
 	"collect-homework-go/database"
-	"collect-homework-go/e2e/request"
+	"collect-homework-go/testing/request"
 	"errors"
 	"log"
 )
@@ -21,7 +21,7 @@ func AdminLogin(baseURL string,email string,password string) (ok bool,token stri
 	}
 	if !loginResponse.Success || len(loginResponse.Data)==0 {
 		log.Println(loginResponse)
-		return false,"",errors.New("Login Response Fail ,With Token: "+loginResponse.Data)
+		return false,"", errors.New(loginResponse.ErrorText)
 	}
 	return true,loginResponse.Data,nil
 }
@@ -29,17 +29,10 @@ func AdminLogin(baseURL string,email string,password string) (ok bool,token stri
 // AdminRegisterAndLogin admin register and login
 func AdminRegisterAndLogin(baseURL string,email string,password string,name string) (ok bool,token string,err error){
 	// request invitation code
-	invitationResponse,err := request.AdminInvitationCode(baseURL+"/admin/invitationCode",&struct{
-		Email string `json:"email"`
-	}{
-		Email: email,
-	})
+	_,err = AdminInvitationCode(baseURL,email)
+
 	if err != nil {
 		return false,"",err
-	}
-	if !invitationResponse.Success {
-		log.Println(invitationResponse)
-		return false,"",errors.New("Invitation Response Fail")
 	}
 
 	invitationCode,err := database.Store.InvitationCode.SelectByEmail(email);
@@ -48,6 +41,33 @@ func AdminRegisterAndLogin(baseURL string,email string,password string,name stri
 	}
 
 	// request register
+	_,err = AdminRegister(baseURL,email,password,name,invitationCode.Code)
+	if err != nil {
+		return false,"",err
+	}
+
+	return AdminLogin(baseURL,email,password)
+}
+
+// AdminInvitationCode admin invitation code
+func AdminInvitationCode(baseURL string,email string)(ok bool,err error){
+	invitationResponse,err := request.AdminInvitationCode(baseURL+"/admin/invitationCode",&struct{
+		Email string `json:"email"`
+	}{
+		Email: email,
+	})
+	if err != nil {
+		return false,err
+	}
+	if !invitationResponse.Success {
+		log.Println(invitationResponse)
+		return false,errors.New(invitationResponse.ErrorText)
+	}
+	return true,nil
+}
+
+// AdminRegister admin register
+func AdminRegister(baseURL string,email string,password string,name string,invitationCode string)(ok bool,err error){
 	registerResponse,err := request.AdminRegister(baseURL+"/admin/register",&struct{
 		Email string `json:"email"`
 		Password string `json:"password"`
@@ -57,15 +77,14 @@ func AdminRegisterAndLogin(baseURL string,email string,password string,name stri
 		Email: email,
 		Password: password,
 		Name: name,
-		InvitationCode: invitationCode.Code,
+		InvitationCode: invitationCode,
 	})
 	if err != nil {
-		return false,"",err
+		return false,err
 	}
 	if !registerResponse.Success {
 		log.Println(registerResponse)
-		return false,"",errors.New("Register Response Fail")
+		return false,errors.New(registerResponse.ErrorText)
 	}
-
-	return AdminLogin(baseURL,email,password)
+	return true,nil
 }

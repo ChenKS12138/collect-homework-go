@@ -1,8 +1,8 @@
 package service
 
 import (
-	"collect-homework-go/e2e/request"
 	"collect-homework-go/model"
+	"collect-homework-go/testing/request"
 	"errors"
 	"log"
 )
@@ -15,7 +15,7 @@ func ProjectList(baseURL string) (ok bool,projects *[]model.ProjectWithAdminName
 	}
 	if !listResponse.Success {
 		log.Println(listResponse)
-		return false,nil,errors.New("Project List Fail")
+		return false,nil,errors.New(listResponse.ErrorText)
 	}
 	return true, &listResponse.Data.Project,nil
 }
@@ -35,20 +35,24 @@ func ProjectInsert(baseURL string,token string) (ok bool,err error){
 	}
 	_,projectsBefore,err := ProjectList(baseURL)
 	if err != nil {
-		return false,errors.New("Project Insert Before Fail")
+		log.Panicln("Project Insert Before Fail")
+		return false,err
 	}
 	insertResponse,err := request.ProjectInsert(baseURL+"/project/insert",token,newProject)
 	if err != nil {
-		return false,err
+		return false,errors.New(insertResponse.ErrorText)
 	}
 	if !insertResponse.Success {
-		return false,errors.New("Project Insert Fail")
+		log.Println("Project Insert Fail")
+		return false,err
 	}
 	_,projectAfter,err := ProjectList(baseURL)
 	if err != nil {
-		return false,errors.New("Project Insert After Fail")
+		log.Println("Project Insert After Fail")
+		return false,err
 	}
 	if len(*projectAfter) - len(*projectsBefore) != 1 {
+		log.Println("Project Insert Count Strange")
 		return false,errors.New("Project Insert Count Strange")
 	}
 	newProjectExist := false
@@ -61,7 +65,8 @@ func ProjectInsert(baseURL string,token string) (ok bool,err error){
 			}
 	}
 	if !newProjectExist {
-		return false,errors.New("Project Insert New Project Missing")
+		log.Println("Project Insert New Project Missing")
+		return false,err
 	}
 	return true,nil
 }

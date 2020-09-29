@@ -61,5 +61,5 @@ func TestWelcome(t *testing.T){
 	if !strings.Contains(string(bytes),"Welcome!\nRequest From ") {
 		t.Fatal(errors.New("Wrong Welcome Format"))
 	}
-	t.Log("Test Welcome Pass")
+	// t.Log("Test Welcome Pass")
 }

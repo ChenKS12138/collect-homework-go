@@ -130,6 +130,18 @@ func register(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
+	adminHasSameEmail,err := database.Store.Admin.SelectByEmail(registerDto.Email)
+
+	if err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+
+	if adminHasSameEmail != nil {
+		render.Render(w,r,ErrEmailUsed)
+		return
+	}
+
 	hashedPassword,err := bcrypt.GenerateFromPassword([]byte(registerDto.Password),10)
 
 	admin := &model.Admin{
