@@ -19,6 +19,7 @@ func NewDataResponse(d interface{}) (*DataResponse){
 	return &DataResponse{
 		Success: true,
 		Data: d,
+		StatusText: "ok",
 	}
 }
 

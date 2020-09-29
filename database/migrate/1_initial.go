@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS submissions (
 	update_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	ip text,
 	PRIMARY KEY (id),
-	FOREIGN KEY (project_id) REFERENCES admins(id)
+	FOREIGN KEY (project_id) REFERENCES projects(id)
 );
 `
 

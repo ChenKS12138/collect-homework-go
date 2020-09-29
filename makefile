@@ -16,3 +16,9 @@ migrate-init:
 
 test-e2e:
 	@go test -v ./e2e
+
+build:
+	@go build -o ./build/main main.go
+
+clean:
+	@rm -rf ./build

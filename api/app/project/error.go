@@ -12,4 +12,10 @@ var (
 		StatusText: "Project Error",
 		ErrorText: "Project Permission Denied",
 	}
+	// ErrProjectNotFound project not found
+	ErrProjectNotFound = &util.ErrResponse{
+		HTTPStatusCode: http.StatusOK,
+		StatusText: "Project Error",
+		ErrorText: "Project Not Found",
+	}
 )

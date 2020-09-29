@@ -21,21 +21,19 @@ func NewInvitationCodeStore(db *pg.DB) (*InvitationCodeStore){
 // SelectByEmail select invitation code by email
 func (s *InvitationCodeStore)SelectByEmail(email string) (*model.InvitationCode,error){
 	invitationCode := &model.InvitationCode{}
-	err := s.db.Model(invitationCode).Where("email = ?",email).Order("create_at DESC").Select();
+	err := s.db.Model(invitationCode).
+		Where("email = ?",email).
+		Order("create_at DESC").
+		Select();
 	if err == pg.ErrNoRows {
-		return nil,nil;
+		return nil,nil
 	}
-	if err != nil {
-		return nil,err
-	}
-	return invitationCode,nil
+	return invitationCode,err
 }
 
 // Insert invitation code insert
 func (s *InvitationCodeStore)Insert(invitaionCode *model.InvitationCode) error {
-	_,err := s.db.Model(invitaionCode).Insert()
-	if err != nil {
-		return err
-	}
-	return nil
+	_,err := s.db.Model(invitaionCode).
+		Insert()
+	return err
 }

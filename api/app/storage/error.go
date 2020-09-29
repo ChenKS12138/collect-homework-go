@@ -30,4 +30,10 @@ var (
 		StatusText: "Storage Error",
 		ErrorText: "File Secret Wrong",
 	}
+	// ErrProjectNotExist project not exist
+	ErrProjectNotExist = &util.ErrResponse{
+		HTTPStatusCode: http.StatusOK,
+		StatusText: "Storage Error",
+		ErrorText: "File Project Not Exist",
+	}
 )

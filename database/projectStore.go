@@ -24,6 +24,9 @@ func (p *ProjectStore)SelectByID(id string) (*model.Project,error){
 	err := p.db.Model(project).
 		Where("id = ?",id).
 		First()
+	if err == pg.ErrNoRows {
+		return nil,nil
+	}
 	return project,err
 }
 
@@ -31,11 +34,16 @@ func (p *ProjectStore)SelectByID(id string) (*model.Project,error){
 func (p *ProjectStore)SelectAdminEmailByID(id string)(*model.ProjectWithAdminEmail,error){
 	project := &model.ProjectWithAdminEmail{}
 	err := p.db.Model(project).
-		Join("LEFT JOIN admins as admin").
-		JoinOn(`admin."name" as admin_name`).
-		Where("id = ?",id).
+		Join("LEFT JOIN admins admin").
+		JoinOn(`project."admin_id" = admin.id`).
+		ColumnExpr(`project.*`).
+		ColumnExpr(`admin."name" as admin_name,admin."email" as admin_email`).
+		Where("project.\"id\" = ?",id).
 		First()
-	return project,err;
+	if err == pg.ErrNoRows {
+		return nil,nil
+	}
+	return project,err
 }
 
 
@@ -46,6 +54,9 @@ func (p *ProjectStore)SelectByAdminID(adminID string) (*[]model.ProjectWithAdmin
 		Where("admin_id = ?",adminID).
 		Column("id","name","file_name_pattern","file_name_extensions","file_name_example","create_at","update_at").
 		Select();
+	if err == pg.ErrNoRows {
+		return nil,nil
+	}
 	return projects,err
 }
 
@@ -54,11 +65,14 @@ func (p *ProjectStore)SelectAllUsable() (*[]model.ProjectWithAdminName,error) {
 	projects := &[]model.ProjectWithAdminName{}
 	err := p.db.Model(projects).
 		Where("usable = ?",true).
-		Join("LEFT JOIN admins as admin").
-		ColumnExpr(`project."id",project."file_name_pattern",project."file_name_extensions",project."file_name_example",project."create_at",project."update_at"`).
-		ColumnExpr(`admin."name" as admin_name`).
-		JoinOn(`admin."id" = project."admin_id"`).
+		Join("LEFT JOIN admins admin").
+		JoinOn(`project."admin_id" = admin."id"`).
+		ColumnExpr(`project."name",project."id",project."file_name_pattern",project."file_name_extensions",project."file_name_example",project."create_at",project."update_at"`).
+		ColumnExpr(`admin."name" AS admin_name`).
 		Select()
+	if err == pg.ErrNoRows {
+		return nil,nil
+	}
 	return projects,err
 }
 

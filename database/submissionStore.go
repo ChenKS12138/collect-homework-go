@@ -24,10 +24,10 @@ func (s *SubmissionStore)SelectByProjectID(projectID string) (*model.Submission,
 	err := s.db.Model(submission).
 		Where("project_id = ?",projectID).
 		First();
-	if err != nil {
-		return nil,err;
+	if err == pg.ErrNoRows {
+		return nil,nil
 	}
-	return submission,nil;
+	return submission,err
 }
 
 // SelectByProjectIDAndName select by project id and name
@@ -35,19 +35,17 @@ func (s *SubmissionStore)SelectByProjectIDAndName(projectID string,name string)(
 	submission:= &model.Submission{}
 	err := s.db.Model(submission).
 		Where("project_id = ?",projectID).
-		Where("name = ?",name).
+		Where("file_name = ?",name).
+		Order("create_at DESC").
 		First()
-	if err != nil {
-		return nil,err
+	if err == pg.ErrNoRows {
+		return nil,nil
 	}
-	return submission,nil
+	return submission,err
 }
 
 // Insert insert
 func (s *SubmissionStore)Insert(submission *model.Submission) error {
 	_,err := s.db.Model(submission).Insert();
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }

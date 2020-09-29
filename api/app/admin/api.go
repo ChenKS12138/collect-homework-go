@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"log"
 	"net/http"
 	"time"
 
@@ -14,25 +15,26 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
+	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 )
 
 // Router router
 func Router()(*chi.Mux ,error){
-	r := chi.NewRouter();
+	r := chi.NewRouter()
 	
 	// protected router
-	r.Group(func(r chi.Router){
-		r.Use(jwtauth.Verifier(auth.TokenAuth))
-		r.Use(jwtauth.Authenticator)
+	r.Group(func(c chi.Router){
+		c.Use(jwtauth.Verifier(auth.TokenAuth))
+		c.Use(jwtauth.Authenticator)
 		
 	})
 
 	// public router
-	r.Group(func(r chi.Router){
-		r.Post("/login",login)
-		r.Post("/register",register)
-		r.Post("/invitationCode",invitationCode)
+	r.Group(func(c chi.Router){
+		c.Post("/login",login)
+		c.Post("/register",register)
+		c.Post("/invitationCode",invitationCode)
 	})
 	return r,nil
 }
@@ -46,14 +48,13 @@ func login(w http.ResponseWriter,r *http.Request) {
 		return
 	} 
 	
-	admin,_ := database.Store.Admin.SelectByEmail(loginDto.Email);
-	if admin == nil {
+	admin,err := database.Store.Admin.SelectByEmail(loginDto.Email);
+	if admin == nil || (bcrypt.CompareHashAndPassword([]byte(admin.Password),[]byte(loginDto.Password)) != nil) {
 		render.Render(w,r,ErrAuthorization)
 		return
 	} 
-	
-	if bcrypt.CompareHashAndPassword([]byte(admin.Password),[]byte(loginDto.Password)) != nil {
-		render.Render(w,r,ErrAuthorization)
+	if err != nil {
+		render.Render(w,r,util.ErrRender(err))
 		return
 	}
 		
@@ -75,12 +76,14 @@ func invitationCode(w http.ResponseWriter,r *http.Request){
 		return
 	}
 
-	if lastInvitationCode,err := database.Store.InvitationCode.SelectByEmail(invitationCodeDto.Email) ; err != nil || (lastInvitationCode!=nil && lastInvitationCode.CreateAt.Before(time.Now().Add(time.Minute))){
-		if err!=nil {
-			render.Render(w,r,util.ErrRender(err))
-		} else {
-			render.Render(w,r,ErrInvitationCodeFrequently)
-		}
+	lastInvitationCode,err := database.Store.InvitationCode.SelectByEmail(invitationCodeDto.Email)
+
+	if lastInvitationCode != nil && lastInvitationCode.CreateAt.Before(time.Now().Add(time.Minute)) {
+		render.Render(w,r,ErrInvitationCodeFrequently)
+		return
+	}
+	if err != nil {
+		render.Render(w,r,util.ErrRender(err))
 		return
 	}
 
@@ -92,10 +95,10 @@ func invitationCode(w http.ResponseWriter,r *http.Request){
 		render.Render(w,r,util.ErrRender(err))
 		return
 	}
-
-	if err :=email.SendMail( email.User,"New Registry",mailText,"Admin") ; err != nil {
-		render.Render(w,r,util.ErrRender(err))
-		return
+	if err :=email.SendMail(viper.GetString("EMAIL_USER"),"New Registry",mailText) ; err != nil {
+		log.Println(err)
+		// render.Render(w,r,util.ErrRender(err))
+		// return
 	}
 
 	invitationCode := &model.InvitationCode{
@@ -115,14 +118,15 @@ func register(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
-	invationCode,err := database.Store.InvitationCode.SelectByEmail(registerDto.Email)
-	if err !=nil {
-		render.Render(w,r,util.ErrRender(err))
+	invitationCode,err := database.Store.InvitationCode.SelectByEmail(registerDto.Email)
+
+	if invitationCode == nil || invitationCode.Code != registerDto.InvitationCode {
+		render.Render(w,r,ErrInvitationCodeWrong)
 		return
 	}
 
-	if invationCode == nil || invationCode.Code != registerDto.InvitationCode {
-		render.Render(w,r,ErrInvitationCodeWrong)
+	if err !=nil {
+		render.Render(w,r,util.ErrRender(err))
 		return
 	}
 

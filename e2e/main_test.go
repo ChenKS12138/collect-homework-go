@@ -3,7 +3,6 @@ package api_test
 import (
 	"collect-homework-go/api"
 	"collect-homework-go/database/migrate"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -19,11 +18,12 @@ import (
 
 var (
 	ts *httptest.Server
+	superAdmin struct {
+		Email string `json:"email"`
+		Password string `json:"password"`
+	}
 )
 
-const (
-	contentTypeJson string = "application/json"
-)
 
 func init(){
 
@@ -35,9 +35,12 @@ func init(){
 	}
 	viper.AutomaticEnv()
 
+	superAdmin.Email = viper.GetString("SUPER_USER_EMAIL")
+	superAdmin.Password = viper.GetString("SUPER_USER_PASSWORD")
 
 	srv,_ := api.NewServer()
 	ts = httptest.NewServer(srv.Handler)
+	
 
 	// clean dababase
 	migrate.Init()
@@ -59,56 +62,4 @@ func TestWelcome(t *testing.T){
 		t.Fatal(errors.New("Wrong Welcome Format"))
 	}
 	t.Log("Test Welcome Pass")
-}
-
-func getRequest(url string,ri interface{}) error{
-	res,err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	bytes,err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return err
-	}
-	return json.Unmarshal(bytes,ri)
-}
-
-func postRequest(url string,ri interface{},response interface{}) error {
-	jsonString,err := newJsonString(ri)
-
-	if err != nil {
-		return err
-	}
-
-	res,err := http.Post(url,contentTypeJson,strings.NewReader(jsonString))
-	responseString,err := parseResponse(res)
-
-	if err !=nil {
-		return err
-	}
-	return json.Unmarshal([]byte(responseString),response)
-}
-
-
-func newJsonString(i interface{}) (string,error) {
-	bytes,err := json.Marshal(i)
-	if err != nil {
-		return "",err
-	}
-	return string(bytes),nil
-}
-
-func parseResponse(r *http.Response) (string,error) {
-	bytes,err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		return "",err
-	}
-	return string(bytes),nil
-}
-
-type BasicResponse struct {
-	Data interface{} `json:"data"`
-	Success bool `json:"success"`           // user-level status message
-	StatusText string `json:"status"`
-	ErrorText string `json:"error"`  // application-level error message, for debugging
 }

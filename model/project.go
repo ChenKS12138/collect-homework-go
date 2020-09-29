@@ -36,7 +36,7 @@ type ProjectWithAdminName struct {
 
 // ProjectWithAdminEmail project wiaht email
 type ProjectWithAdminEmail struct {
-	tablename struct{} `pg:"projects,alias:project"`
+	tableName struct{} `pg:"projects,alias:project"`
 	ProjectWithAdminName
 	AdminEmail string `json:"adminEmail,omitempty"`
 }

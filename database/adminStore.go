@@ -21,38 +21,42 @@ func NewAdminStore(db *pg.DB) (*AdminStore) {
 // SelectByName get admin by name
 func (s *AdminStore)SelectByName(name string) (*model.Admin,error){
 	admin := &model.Admin{}
-	err := s.db.Model(admin).Where("name = ?",name).First();
-	if err != nil {
-		return nil,err
+	err := s.db.Model(admin).
+		Where("name = ?",name).
+		First()
+	if err == pg.ErrNoRows {
+		return nil,nil
 	}
-	return admin,nil
+	return admin,err
 }
 
 // SelectByEmail get admin by email
 func (s *AdminStore)SelectByEmail(email string) (*model.Admin,error){
 	admin:= &model.Admin{};
-	err := s.db.Model(admin).Where("email = ?",email).First();
-	if err != nil {
-		return nil,err
+	err := s.db.Model(admin).
+		Where("email = ?",email).
+		First()
+	if err == pg.ErrNoRows {
+		return nil,nil
 	}
 	return admin,err
 }
 
 // Insert insert
 func (s *AdminStore)Insert(admin *model.Admin) error {
-	_,err := s.db.Model(admin).Insert();
-	if err != nil {
-		return err
-	}
-	return nil
+	_,err := s.db.Model(admin).
+		Insert()
+	return err
 }
 
 // SelectByID select by id
 func (s *AdminStore)SelectByID(id string) (*model.Admin,error){
 	admin:=&model.Admin{}
-	err := s.db.Model(admin).Where("id = ?",id).First();
-	if err != nil {
-		return nil,err
+	err := s.db.Model(admin).
+		Where("id = ?",id).
+		First()
+	if err == pg.ErrNoRows {
+		return nil,nil
 	}
 	return admin,err
 }

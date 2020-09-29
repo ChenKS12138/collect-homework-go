@@ -17,20 +17,20 @@ func Router()(*chi.Mux,error){
 	r := chi.NewRouter()
 
 	// protected router
-	r.Group(func (r chi.Router){
-		r.Use(jwtauth.Verifier(auth.TokenAuth))
-		r.Use(jwtauth.Authenticator)
+	r.Group(func (c chi.Router){
+		c.Use(jwtauth.Verifier(auth.TokenAuth))
+		c.Use(jwtauth.Authenticator)
 		
-		r.Get("/own",own)
-		r.Post("/insert",insert)
-		r.Post("/update",update)
+		c.Get("/own",own)
+		c.Post("/insert",insert)
+		c.Post("/update",update)
 		// 不使用真正的delete
 		// r.Post("/delete",delete)
 	})
 
 	// public router
-	r.Group(func(r chi.Router){
-		r.Get("/",list)
+	r.Group(func(c chi.Router){
+		c.Get("/",list)
 	})
 	return r,nil
 }
@@ -97,6 +97,12 @@ func update(w http.ResponseWriter,r *http.Request){
 	}
 
 	lastProject,err := database.Store.Project.SelectByID(updateDto.ID)
+
+	if lastProject == nil {
+		render.Render(w,r,ErrProjectNotFound)
+		return
+	}
+
 	if err !=nil {
 		render.Render(w,r,util.ErrRender(err))
 		return

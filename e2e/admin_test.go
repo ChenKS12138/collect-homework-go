@@ -1,32 +1,17 @@
 package api_test
 
 import (
-	"errors"
 	"testing"
 
-	"github.com/spf13/viper"
+	"collect-homework-go/e2e/service"
 )
 
 // POST /admin/login
 func TestSuperAdminAuth(t *testing.T) {
-	response := &struct{
-		BasicResponse
-		Data string `json:"data"`
-	}{}
-	err := postRequest(ts.URL+"/admin/login",&struct{
-		Email string `json:"email"`;
-		Password string `json:"password"`;
-	} {
-		Email:viper.GetString("SUPER_USER_EMAIL"),
-		Password: viper.GetString("SUPER_USER_PASSWORD"),
-	},&response)
+	_,_,err := service.AdminLogin(ts.URL,superAdmin.Email,superAdmin.Password)
 
 	if err != nil {
 		t.Fatal(err)
-	}
-
-	if len(response.Data) == 0 {
-		t.Fatal(errors.New("Wrong JWT Token"),response)
 	}
 	t.Log("Test Super Admin Auth Pass")
 }
@@ -36,18 +21,18 @@ func TestSuperAdminAuth(t *testing.T) {
 // POST /admin/login
 // TODO 对邮件模块的验证
 func TestCommonAdminAuth(t *testing.T){
-	invitaionReponse := &struct {
-		BasicResponse
-	}{}
-
-	err := postRequest(ts.URL+"/admin/register",&struct {
-		Email string `json:"email"`;
+	userInfo := struct {
+		Email string `json:"email"`
+		Password string `json:"password"`
+		Name string `json:"name"`
 	} {
-		Email: "test@example.com",
-	},&invitaionReponse)
-
+		Email:  "test@example.com",
+		Password: "password",
+		Name: "admin",
+	}
+	_,_,err := service.AdminRegisterAndLogin(ts.URL,userInfo.Email,userInfo.Password,userInfo.Name)
 	if err != nil {
 		t.Fatal(err)
 	}
-
+	t.Log("Test Common Admin Auth Pass")
 }
