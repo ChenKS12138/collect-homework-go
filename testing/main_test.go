@@ -2,6 +2,7 @@ package api_test
 
 import (
 	"collect-homework-go/api"
+	"collect-homework-go/auth"
 	"collect-homework-go/database/migrate"
 	"errors"
 	"fmt"
@@ -13,6 +14,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/go-chi/jwtauth"
 	"github.com/spf13/viper"
 )
 
@@ -37,6 +39,7 @@ func init(){
 
 	superAdmin.Email = viper.GetString("SUPER_USER_EMAIL")
 	superAdmin.Password = viper.GetString("SUPER_USER_PASSWORD")
+	auth.TokenAuth =  jwtauth.New("HS256",[]byte(viper.GetString("JWT_SECRET")),nil)
 
 	srv,_ := api.NewServer()
 	ts = httptest.NewServer(srv.Handler)

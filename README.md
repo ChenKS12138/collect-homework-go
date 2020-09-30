@@ -26,6 +26,8 @@ make run
 ```sh
 PORT=3000
 
+JWT_SECRET=secret
+
 DB_NETWORK=tcp
 DB_ADDR=127.0.0.1:5432
 DB_USER=postgres

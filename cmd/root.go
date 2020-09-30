@@ -1,10 +1,12 @@
 package cmd
 
 import (
+	"collect-homework-go/auth"
 	"fmt"
 	"os"
 	"path/filepath"
 
+	"github.com/go-chi/jwtauth"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -38,4 +40,6 @@ func LoadConfig(){
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+
+	auth.TokenAuth =  jwtauth.New("HS256",[]byte(viper.GetString("JWT_SECRET")),nil)
 }

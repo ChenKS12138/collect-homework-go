@@ -47,7 +47,7 @@ func own(w http.ResponseWriter,r *http.Request){
 		render.Render(w,r,util.ErrRender(err))
 		return
 	}
-	render.JSON(w,r,projects)
+	render.JSON(w,r,util.NewDataResponse(projects))
 }
 
 // insert
