@@ -19,8 +19,8 @@ import (
 )
 
 var (
-	ts *httptest.Server
-	superAdmin struct {
+	Ts *httptest.Server
+	SuperAdmin struct {
 		Email string `json:"email"`
 		Password string `json:"password"`
 		Name string `json:"name"`
@@ -38,13 +38,13 @@ func init(){
 	}
 	viper.AutomaticEnv()
 
-	superAdmin.Email = viper.GetString("SUPER_USER_EMAIL")
-	superAdmin.Password = viper.GetString("SUPER_USER_PASSWORD")
-	superAdmin.Name = viper.GetString("SUPER_USER_NAME")
+	SuperAdmin.Email = viper.GetString("SUPER_USER_EMAIL")
+	SuperAdmin.Password = viper.GetString("SUPER_USER_PASSWORD")
+	SuperAdmin.Name = viper.GetString("SUPER_USER_NAME")
 	auth.TokenAuth =  jwtauth.New("HS256",[]byte(viper.GetString("JWT_SECRET")),nil)
 
 	srv,_ := api.NewServer()
-	ts = httptest.NewServer(srv.Handler)
+	Ts = httptest.NewServer(srv.Handler)
 	
 
 	// clean dababase
@@ -55,7 +55,7 @@ func init(){
 
 // GET /
 func TestWelcome(t *testing.T){
-	response,err := http.Get(ts.URL)
+	response,err := http.Get(Ts.URL)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -66,5 +66,4 @@ func TestWelcome(t *testing.T){
 	if !strings.Contains(string(bytes),"Welcome!\nRequest From ") {
 		t.Fatal(errors.New("Wrong Welcome Format"))
 	}
-	// t.Log("Test Welcome Pass")
 }

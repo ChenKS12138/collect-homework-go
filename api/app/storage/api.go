@@ -104,8 +104,9 @@ func upload(w http.ResponseWriter,r *http.Request){
 			render.Render(w,r,ErrFileNameExtensions)
 			return
 		}
+		fileNamePrefix = fileNamePrefix[:(dotIndex)]
 	}
-	ok,err := regexp.Match(lastProject.FileNamePattern,[]byte(uploadDto.FileHeader.Filename))
+	ok,err := regexp.Match(lastProject.FileNamePattern,[]byte(fileNamePrefix))
 	if err!=nil {
 		render.Render(w,r,util.ErrRender(err))
 		return

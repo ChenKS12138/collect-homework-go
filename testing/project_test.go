@@ -9,7 +9,7 @@ import (
 
 // GET /project/
 func TestProjectList(t *testing.T){
-	_,_,err := service.ProjectList(ts.URL)
+	_,_,err := service.ProjectList(Ts.URL)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -19,11 +19,11 @@ func TestProjectList(t *testing.T){
 // GET /project/
 // POST /project/insert
 func TestSuperAdminProjectInsert(t *testing.T){
-	_,token,err := service.AdminLogin(ts.URL,superAdmin.Email,superAdmin.Password)
+	_,token,err := service.AdminLogin(Ts.URL,SuperAdmin.Email,SuperAdmin.Password)
 	if err != nil {
 		t.Fatal(err)
 	}	
-	_,err = service.ProjectInsert(ts.URL,token,"superAdminInsertProject")
+	_,err = service.ProjectInsert(Ts.URL,token,"superAdminInsertProject","\\w",[]string{"doc","docx"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -34,11 +34,11 @@ func TestSuperAdminProjectInsert(t *testing.T){
 // POST /project/insert
 func TestCommonAdminProjectInsert(t *testing.T){
 	randomText := util.RandString(6)
-	_,token,err := service.AdminRegisterAndLogin(ts.URL,"common_admin_project_insert_"+randomText+"@example.com","secret","commonAdminProjectInsert")
+	_,token,err := service.AdminRegisterAndLogin(Ts.URL,"common_admin_project_insert_"+randomText+"@example.com","secret","commonAdminProjectInsert")
 	if err !=nil {
 		t.Fatal(err)
 	}
-	_,err = service.ProjectInsert(ts.URL,token,"commonAdminInsertProject")
+	_,err = service.ProjectInsert(Ts.URL,token,"commonAdminInsertProject","\\w",[]string{"doc","docx"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,37 +54,37 @@ func TestProjectOwn(t *testing.T){
 		Name string `json:"name"`
 	}
 	superUser := &user{
-		Email: superAdmin.Email,
-		Password: superAdmin.Password,
-		Name: superAdmin.Name,
+		Email: SuperAdmin.Email,
+		Password: SuperAdmin.Password,
+		Name: SuperAdmin.Name,
 	}
 	commonUser := &user{
 		Email: "TestProjectOwn@example.com",
 		Password: "TestProjectOwn",
 		Name: "commonuser_"+util.RandString(6),
 	}
-	_,superUserToken,err := service.AdminLogin(ts.URL,superUser.Email,superUser.Password)
+	_,superUserToken,err := service.AdminLogin(Ts.URL,superUser.Email,superUser.Password)
 	if err != nil {
 		t.Fatal(err)
 	}
 	commonUserProjectName := "commonUserProject_"+util.RandString(6)
 	superUserProjectName := "superUserProject_"+util.RandString(6)
 
-	_,commonUserToken,err := service.AdminRegisterAndLogin(ts.URL,commonUser.Email,commonUser.Password,commonUser.Name)
+	_,commonUserToken,err := service.AdminRegisterAndLogin(Ts.URL,commonUser.Email,commonUser.Password,commonUser.Name)
 
-	_,err = service.ProjectInsert(ts.URL,commonUserToken,commonUserProjectName)
+	_,err = service.ProjectInsert(Ts.URL,commonUserToken,commonUserProjectName,"\\w",[]string{"doc","docx"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.ProjectInsert(ts.URL,superUserToken,superUserProjectName)
+	_,err = service.ProjectInsert(Ts.URL,superUserToken,superUserProjectName,"\\w",[]string{"doc","docx"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,commonUserProjectOwn,err := service.ProjectOwn(ts.URL,commonUserToken)
+	_,commonUserProjectOwn,err := service.ProjectOwn(Ts.URL,commonUserToken)
 	if err !=nil {
 		t.Fatal(err)
 	}
-	_,superUserProjectOwn,err := service.ProjectOwn(ts.URL,superUserToken)
+	_,superUserProjectOwn,err := service.ProjectOwn(Ts.URL,superUserToken)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -123,9 +123,9 @@ func TestProjectUpdate(t *testing.T){
 		Name string `json:"name"`
 	}
 	superUser := &user{
-		Email: superAdmin.Email,
-		Password: superAdmin.Password,
-		Name: superAdmin.Name,
+		Email: SuperAdmin.Email,
+		Password: SuperAdmin.Password,
+		Name: SuperAdmin.Name,
 	}
 	commonUser := &user{
 		Email: "TestProjectUpdate@example.com",
@@ -133,11 +133,11 @@ func TestProjectUpdate(t *testing.T){
 		Name: "common_user_"+util.RandString(6),
 	}
 
-	_,superUserToken,err := service.AdminLogin(ts.URL,superUser.Email,superUser.Password)
+	_,superUserToken,err := service.AdminLogin(Ts.URL,superUser.Email,superUser.Password)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,commonUserToken,err := service.AdminRegisterAndLogin(ts.URL,commonUser.Email,commonUser.Password,commonUser.Name)
+	_,commonUserToken,err := service.AdminRegisterAndLogin(Ts.URL,commonUser.Email,commonUser.Password,commonUser.Name)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -145,12 +145,12 @@ func TestProjectUpdate(t *testing.T){
 	oldProjectName := "test_project_update_"+util.RandString(6)
 	newProjectName := "test_project_update_"+util.RandString(6)
 
-	_,err = service.ProjectInsert(ts.URL,commonUserToken,oldProjectName)
+	_,err = service.ProjectInsert(Ts.URL,commonUserToken,oldProjectName,"\\w",[]string{"doc","docx"})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_,projects,err := service.ProjectOwn(ts.URL,commonUserToken)
+	_,projects,err := service.ProjectOwn(Ts.URL,commonUserToken)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -160,11 +160,11 @@ func TestProjectUpdate(t *testing.T){
 	targetProjectID := (*projects)[0].ID
 
 	// common user update project name
-	_,err = service.ProjectUpdateName(ts.URL,commonUserToken,targetProjectID,newProjectName)
+	_,err = service.ProjectUpdateName(Ts.URL,commonUserToken,targetProjectID,newProjectName)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,projects,err = service.ProjectOwn(ts.URL,commonUserToken)
+	_,projects,err = service.ProjectOwn(Ts.URL,commonUserToken)
 	commonUserUpdateProjectNameOk := false
 	for _,project := range(*projects){
 		if project.ID == targetProjectID &&
@@ -177,11 +177,11 @@ func TestProjectUpdate(t *testing.T){
 	}
 
 	// super user update project name
-	_,err = service.ProjectUpdateName(ts.URL,superUserToken,targetProjectID,oldProjectName)
+	_,err = service.ProjectUpdateName(Ts.URL,superUserToken,targetProjectID,oldProjectName)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,projects,err = service.ProjectOwn(ts.URL,superUserToken)
+	_,projects,err = service.ProjectOwn(Ts.URL,superUserToken)
 	superUserUpdateProjectNameOk := false
 	for _,project := range(*projects){
 		if project.ID == targetProjectID &&
@@ -201,9 +201,9 @@ func TestProjectDelete(t *testing.T){
 		Name string `json:"name"`
 	}
 	superUser := &user{
-		Email: superAdmin.Email,
-		Password: superAdmin.Password,
-		Name: superAdmin.Name,
+		Email: SuperAdmin.Email,
+		Password: SuperAdmin.Password,
+		Name: SuperAdmin.Name,
 	}
 	commonUser := &user{
 		Email: "TestProjectDelete@example.com",
@@ -211,11 +211,11 @@ func TestProjectDelete(t *testing.T){
 		Name: "common_user_"+util.RandString(6),
 	}
 
-	_,superUserToken,err := service.AdminLogin(ts.URL,superUser.Email,superUser.Password)
+	_,superUserToken,err := service.AdminLogin(Ts.URL,superUser.Email,superUser.Password)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,commonUserToken,err := service.AdminRegisterAndLogin(ts.URL,commonUser.Email,commonUser.Password,commonUser.Name)
+	_,commonUserToken,err := service.AdminRegisterAndLogin(Ts.URL,commonUser.Email,commonUser.Password,commonUser.Name)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -224,15 +224,15 @@ func TestProjectDelete(t *testing.T){
 	projectName2 := "common_user_delete_2_"+util.RandString(6)
 
 	// insert
-	_,err = service.ProjectInsert(ts.URL,commonUserToken,projectName1)
+	_,err = service.ProjectInsert(Ts.URL,commonUserToken,projectName1,"\\w",[]string{"doc","docx"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.ProjectInsert(ts.URL,commonUserToken,projectName2)
+	_,err = service.ProjectInsert(Ts.URL,commonUserToken,projectName2,"\\w",[]string{"doc","docx"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,projects,err := service.ProjectList(ts.URL)
+	_,projects,err := service.ProjectList(Ts.URL)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -256,15 +256,15 @@ func TestProjectDelete(t *testing.T){
 	}
 
 	// delete
-	_,err = service.ProjectDelete(ts.URL,commonUserToken,projectID1)
+	_,err = service.ProjectDelete(Ts.URL,commonUserToken,projectID1)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.ProjectDelete(ts.URL,superUserToken,projectID2)
+	_,err = service.ProjectDelete(Ts.URL,superUserToken,projectID2)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,projects,err = service.ProjectList(ts.URL)
+	_,projects,err = service.ProjectList(Ts.URL)
 	if err != nil {
 		t.Fatal(err)
 	}

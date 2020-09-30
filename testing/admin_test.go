@@ -12,7 +12,7 @@ import (
 
 // POST /admin/login
 func TestSuperAdminAuth(t *testing.T) {
-	_,_,err := service.AdminLogin(ts.URL,superAdmin.Email,superAdmin.Password)
+	_,_,err := service.AdminLogin(Ts.URL,SuperAdmin.Email,SuperAdmin.Password)
 
 	if err != nil {
 		t.Fatal(err)
@@ -33,7 +33,7 @@ func TestCommonAdminAuth(t *testing.T){
 		Password: "password",
 		Name: "admin",
 	}
-	_,_,err := service.AdminRegisterAndLogin(ts.URL,userInfo.Email,userInfo.Password,userInfo.Name)
+	_,_,err := service.AdminRegisterAndLogin(Ts.URL,userInfo.Email,userInfo.Password,userInfo.Name)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,11 +51,11 @@ func TestAdminLoginWrong(t *testing.T){
 		Password: "password2",
 		Name: "testWrong",
 	}
-	_,_,err := service.AdminRegisterAndLogin(ts.URL,userInfo.Email,userInfo.Password,userInfo.Name)
+	_,_,err := service.AdminRegisterAndLogin(Ts.URL,userInfo.Email,userInfo.Password,userInfo.Name)
 	if err != nil {
 		t.Fatal(err)
 	}
-	ok,_,err := service.AdminLogin(ts.URL,userInfo.Email,userInfo.Password+"123")
+	ok,_,err := service.AdminLogin(Ts.URL,userInfo.Email,userInfo.Password+"123")
 	
 	if ok || !strings.Contains(err.Error(),admin.ErrAuthorization.ErrorText) {
 		t.Fatal(errors.New("Test Admin Login Wrong Fail"))
@@ -70,11 +70,11 @@ func TestAdminRegisterEmailUsed(t *testing.T){
 		Password string `json:"password"`
 		Name string `json:"name"`
 	} {
-		Email:  superAdmin.Email,
-		Password: superAdmin.Password,
+		Email:  SuperAdmin.Email,
+		Password: SuperAdmin.Password,
 		Name: "testEmailUsed",
 	}
-	ok,_,err := service.AdminRegisterAndLogin(ts.URL,userInfo.Email,userInfo.Password,userInfo.Name)
+	ok,_,err := service.AdminRegisterAndLogin(Ts.URL,userInfo.Email,userInfo.Password,userInfo.Name)
 	if ok || !strings.Contains(err.Error(),admin.ErrEmailUsed.ErrorText){
 		t.Fatal(errors.New("Test Admin Register Email Used Fail"))
 	}
@@ -83,11 +83,11 @@ func TestAdminRegisterEmailUsed(t *testing.T){
 // 不允许同一个email频繁申请邀请码
 func TestAdminInvitationCodeFrequence(t *testing.T) {
 	email := "TestAdminInvitationCodeFrequence@example.com"
-	_,err := service.AdminInvitationCode(ts.URL,email)
+	_,err := service.AdminInvitationCode(Ts.URL,email)
 	if err != nil {
 		t.Fatal(err)
 	}
-	ok,err := service.AdminInvitationCode(ts.URL,email)
+	ok,err := service.AdminInvitationCode(Ts.URL,email)
 
 	if ok || !strings.Contains(err.Error(),admin.ErrInvitationCodeFrequently.ErrorText) {
 		t.Fatal("Test Admin Invitation Code Frequence Fail")
@@ -105,7 +105,7 @@ func TestAdminRegisterWrongCode(t *testing.T){
 		Password: "password1",
 		Name: "TestAdminRegisterWrongCode",
 	}
-	_,err := service.AdminInvitationCode(ts.URL,userInfo.Email)
+	_,err := service.AdminInvitationCode(Ts.URL,userInfo.Email)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,7 +114,7 @@ func TestAdminRegisterWrongCode(t *testing.T){
 	if err != nil {
 		t.Fatal(err)
 	}
-	ok,err := service.AdminRegister(ts.URL,userInfo.Email,userInfo.Password,userInfo.Name,invitationCode.Code+"123")
+	ok,err := service.AdminRegister(Ts.URL,userInfo.Email,userInfo.Password,userInfo.Name,invitationCode.Code+"123")
 
 	if ok || ! strings.Contains(err.Error(),admin.ErrInvitationCodeWrong.ErrorText){
 		t.Fatal("Test Admin Register Wrong Code Fail")

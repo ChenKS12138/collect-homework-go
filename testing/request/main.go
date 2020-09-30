@@ -10,6 +10,7 @@ import (
 
 const (
 	contentTypeJSON string = "application/json"
+	contentTypeFormData string = "multipart/form-data"
 )
 
 var client *http.Client

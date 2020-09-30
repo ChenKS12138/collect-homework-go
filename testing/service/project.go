@@ -21,7 +21,7 @@ func ProjectList(baseURL string) (ok bool,projects *[]model.ProjectWithAdminName
 }
 
 // ProjectInsert project insert
-func ProjectInsert(baseURL string,token string,projectName string) (ok bool,err error){
+func ProjectInsert(baseURL string,token string,projectName string,pattern string,extensions []string) (ok bool,err error){
 	newProject :=  &struct {
 		Name string `json:"name"`
 		FileNamePattern string `json:"fileNamePattern"`
@@ -29,8 +29,8 @@ func ProjectInsert(baseURL string,token string,projectName string) (ok bool,err 
 		FileNameExample string `json:"fileNameExample"`
 	} {
 		Name: projectName,
-		FileNamePattern: "\\w+-\\w+",
-		FileNameExtensions: []string{"doc","docx"},
+		FileNamePattern: pattern,
+		FileNameExtensions: extensions,
 		FileNameExample: "B123456-cattchen.doc",
 	}
 	_,projectsBefore,err := ProjectList(baseURL)

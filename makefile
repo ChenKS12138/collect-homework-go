@@ -14,6 +14,7 @@ migrate:
 migrate-init:
 	@go run main.go migrate --init --config-file=.env
 
+test:export STORAGE_PATH_PREFIX=../tmp
 test:
 	@go test -v ./testing
 
