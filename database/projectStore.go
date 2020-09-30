@@ -46,6 +46,20 @@ func (p *ProjectStore)SelectAdminEmailByID(id string)(*model.ProjectWithAdminEma
 	return project,err
 }
 
+//SelectAllWithName select all with admin name
+func (p *ProjectStore)SelectAllWithName()(*[]model.ProjectWithAdminName,error) {
+	projects := &[]model.ProjectWithAdminName{}
+	err := p.db.Model(projects).
+		Join("LEFT JOIN admins admin").
+		JoinOn(`project."admin_id" = admin."id"`).
+		ColumnExpr(`project."name",project."id",project."file_name_pattern",project."file_name_extensions",project."file_name_example",project."create_at",project."update_at"`).
+		ColumnExpr(`admin."name" AS admin_name`).
+		Select()
+	if err == pg.ErrNoRows {
+		return nil,nil
+	}
+	return projects,err
+}
 
 // SelectByAdminID select by admin id
 func (p *ProjectStore)SelectByAdminID(adminID string) (*[]model.ProjectWithAdminName,error) {

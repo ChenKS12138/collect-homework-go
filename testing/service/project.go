@@ -21,14 +21,14 @@ func ProjectList(baseURL string) (ok bool,projects *[]model.ProjectWithAdminName
 }
 
 // ProjectInsert project insert
-func ProjectInsert(baseURL string,token string) (ok bool,err error){
+func ProjectInsert(baseURL string,token string,projectName string) (ok bool,err error){
 	newProject :=  &struct {
 		Name string `json:"name"`
 		FileNamePattern string `json:"fileNamePattern"`
 		FileNameExtensions []string `json:"fileNameExtensions"`
 		FileNameExample string `json:"fileNameExample"`
 	} {
-		Name: "操作系统实验1",
+		Name: projectName,
 		FileNamePattern: "\\w+-\\w+",
 		FileNameExtensions: []string{"doc","docx"},
 		FileNameExample: "B123456-cattchen.doc",
@@ -67,6 +67,111 @@ func ProjectInsert(baseURL string,token string) (ok bool,err error){
 	if !newProjectExist {
 		log.Println("Project Insert New Project Missing")
 		return false,err
+	}
+	return true,nil
+}
+
+// ProjectOwn project own
+func ProjectOwn(baseURL string,token string)(ok bool,projects *[]model.ProjectWithAdminName,err error){
+	ownResponse,err := request.ProjectOwn(baseURL+"/project/own",token)
+	if err != nil {
+		return false,nil,err
+	}
+	if !ownResponse.Success {
+		log.Println(ownResponse)
+		return false,nil,errors.New(ownResponse.ErrorText)
+	}
+	return true,&ownResponse.Data.Project,nil
+}
+
+// ProjectUpdateName project name
+func ProjectUpdateName(baseURL string,token string,projectID string,projectName string)(ok bool,err error){
+	_,projects,err := ProjectOwn(baseURL,token)
+	if err != nil {
+		return false,err
+	}
+	targetProject := &model.ProjectWithAdminName{};
+	found := false
+	for _,project := range(*projects){
+		if project.ID == projectID {
+			found = true
+			targetProject.FileNameExample = project.FileNameExample
+			targetProject.FileNameExtensions = project.FileNameExtensions
+			targetProject.FileNamePattern = project.FileNamePattern
+			targetProject.ID = project.ID
+			targetProject.Name = projectName
+		}
+	}
+	if !found {
+		return false,errors.New("No Such Project ID")
+	}
+	updateResponse,err := request.ProjectUpdate(baseURL+"/project/update",token,&struct {
+		ID string `json:"id"`
+		Usable bool `json:"usable"`
+		Name string `json:"name"`
+		FileNamePattern string `json:"fileNamePattern"`
+		FileNameExtensions []string `json:"fileNameExtensions"`
+		FileNameExample string `json:"fileNameExample"`
+	}{
+		ID: targetProject.ID,
+		Usable: true,
+		Name: targetProject.Name,
+		FileNamePattern: targetProject.FileNamePattern,
+		FileNameExtensions: targetProject.FileNameExtensions,
+		FileNameExample: targetProject.FileNameExample,
+	})
+	if err != nil {
+		return false,err
+	}
+	if !updateResponse.Success {
+		log.Println(updateResponse)
+		return false,errors.New("Update Response Fail")
+	}
+	return true,nil
+}
+
+// ProjectDelete project delete
+func ProjectDelete(baseURL string,token string,projectID string) (ok bool,err error){
+	_,projects,err := ProjectOwn(baseURL,token)
+	if err != nil {
+		return false,err
+	}
+	targetProject := &model.ProjectWithAdminName{};
+	found := false
+	for _,project := range(*projects){
+		if project.ID == projectID {
+			found = true
+			targetProject.FileNameExample = project.FileNameExample
+			targetProject.FileNameExtensions = project.FileNameExtensions
+			targetProject.FileNamePattern = project.FileNamePattern
+			targetProject.ID = project.ID
+			targetProject.Name = project.Name
+		}
+	}
+	if !found {
+		return false,errors.New("No Such Project ID")
+	}
+	updateResponse,err := request.ProjectUpdate(baseURL+"/project/update",token,&struct {
+		ID string `json:"id"`
+		Usable bool `json:"usable"`
+		Name string `json:"name"`
+		FileNamePattern string `json:"fileNamePattern"`
+		FileNameExtensions []string `json:"fileNameExtensions"`
+		FileNameExample string `json:"fileNameExample"`
+	}{
+		ID: targetProject.ID,
+		Usable: false,
+		Name: targetProject.Name,
+		FileNamePattern: targetProject.FileNamePattern,
+		FileNameExtensions: targetProject.FileNameExtensions,
+		FileNameExample: targetProject.FileNameExample,
+	})
+	if err != nil {
+		return false,err
+	}
+	if !updateResponse.Success {
+		log.Println(updateResponse)
+		return false,errors.New("Update Response Fail")
 	}
 	return true,nil
 }

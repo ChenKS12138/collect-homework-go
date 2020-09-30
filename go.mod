@@ -16,7 +16,6 @@ require (
 	github.com/go-mail/mail v2.3.1+incompatible // indirect
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
 	github.com/go-pg/migrations/v8 v8.0.1
-	github.com/go-pg/pg v8.0.7+incompatible
 	github.com/go-pg/pg/v10 v10.3.1
 	github.com/go-pg/pgext v0.1.4
 	github.com/gofrs/uuid v3.2.0+incompatible // indirect

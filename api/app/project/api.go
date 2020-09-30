@@ -41,13 +41,24 @@ func own(w http.ResponseWriter,r *http.Request){
 		render.Render(w,r,util.ErrRender(err))
 		return
 	}
+	projects := &[]model.ProjectWithAdminName{}
 
-	projects,err := database.Store.Project.SelectByAdminID(claim.ID);
+	// 超级管理员允许查看所有
+	if claim.IsSuperAdmin {
+		projects,err = database.Store.Project.SelectAllWithName()
+	} else {
+		projects,err = database.Store.Project.SelectByAdminID(claim.ID);
+	}
+
 	if err !=nil {
 		render.Render(w,r,util.ErrRender(err))
 		return
 	}
-	render.JSON(w,r,util.NewDataResponse(projects))
+	render.JSON(w,r,util.NewDataResponse(struct {
+		Projects []model.ProjectWithAdminName `json:"projects"`;
+	}{
+		Projects: *projects,
+	}))
 }
 
 // insert
@@ -108,7 +119,7 @@ func update(w http.ResponseWriter,r *http.Request){
 		return
 	}
 
-	if lastProject.AdminID != claim.ID {
+	if !claim.IsSuperAdmin && lastProject.AdminID != claim.ID {
 		render.Render(w,r,ErrProjectPermission)
 		return
 	}
@@ -126,26 +137,26 @@ func update(w http.ResponseWriter,r *http.Request){
 }
 
 // delete !discard
-func delete(w http.ResponseWriter,r *http.Request){
-	claim,err := auth.GenerateClaim(r)
-	if err != nil {
-		render.Render(w,r,util.ErrRender(err))
-		return
-	}
+// func delete(w http.ResponseWriter,r *http.Request){
+// 	claim,err := auth.GenerateClaim(r)
+// 	if err != nil {
+// 		render.Render(w,r,util.ErrRender(err))
+// 		return
+// 	}
 
-	deleteDto := &DeleteDto{}
-	render.DecodeJSON(r.Body,deleteDto)
-	if err = deleteDto.validate();err !=nil {
-		render.Render(w,r,util.ErrRender(err))
-		return
-	}
+// 	deleteDto := &DeleteDto{}
+// 	render.DecodeJSON(r.Body,deleteDto)
+// 	if err = deleteDto.validate();err !=nil {
+// 		render.Render(w,r,util.ErrRender(err))
+// 		return
+// 	}
 
-	if err = database.Store.Project.Delete(deleteDto.ID,claim.ID); err != nil {
-		render.Render(w,r,util.ErrRender(err))
-		return
-	}
-	render.JSON(w,r,util.NewDataResponse(true))
-}
+// 	if err = database.Store.Project.Delete(deleteDto.ID,claim.ID); err != nil {
+// 		render.Render(w,r,util.ErrRender(err))
+// 		return
+// 	}
+// 	render.JSON(w,r,util.NewDataResponse(true))
+// }
 
 // list
 func list(w http.ResponseWriter, r *http.Request){

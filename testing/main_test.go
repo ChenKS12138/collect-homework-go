@@ -23,6 +23,7 @@ var (
 	superAdmin struct {
 		Email string `json:"email"`
 		Password string `json:"password"`
+		Name string `json:"name"`
 	}
 )
 
@@ -39,6 +40,7 @@ func init(){
 
 	superAdmin.Email = viper.GetString("SUPER_USER_EMAIL")
 	superAdmin.Password = viper.GetString("SUPER_USER_PASSWORD")
+	superAdmin.Name = viper.GetString("SUPER_USER_NAME")
 	auth.TokenAuth =  jwtauth.New("HS256",[]byte(viper.GetString("JWT_SECRET")),nil)
 
 	srv,_ := api.NewServer()
