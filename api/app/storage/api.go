@@ -40,11 +40,13 @@ func Router()(*chi.Mux,error){
 		c.Use(jwtauth.Verifier(auth.TokenAuth))
 		c.Use(jwtauth.Authenticator)
 		c.Get("/download",download)
+		c.Get("/fileList",fileList)
 	})
 
 	// public router
 	r.Group(func(c chi.Router){
 		c.Post("/upload",upload)
+		c.Get("/fileCount",fileCount)
 	})
 	return r,nil
 }
@@ -143,9 +145,11 @@ func upload(w http.ResponseWriter,r *http.Request){
 		FilePath: filePath,
 		Secret: string(secret),
 	}
-	if err= database.Store.Submission.Insert(submission);err !=nil {
-		render.Render(w,r,util.ErrRender(err))
-		return
+	if lastSubmission == nil {
+		if err= database.Store.Submission.Insert(submission);err !=nil {
+			render.Render(w,r,util.ErrRender(err))
+			return
+		}
 	}
 	statusText :=statusCreate
 	if lastSubmission != nil {
@@ -204,6 +208,82 @@ func download(w http.ResponseWriter,r *http.Request){
 	zipBytes,err := ioutil.ReadFile(zipFilePath)
 	if err != nil {
 		render.Render(w,r,util.ErrRender(err))
+		return
 	}
 	render.Data(w,r,zipBytes)
+}
+
+func fileCount(w http.ResponseWriter,r *http.Request){
+	values := r.URL.Query()
+	fileCountDto := &FileCountDto{
+		ID: values.Get("id"),
+	}
+	if err := fileCountDto.validate();err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+	count,err := database.Store.Submission.SelectCountByProjectID(fileCountDto.ID)
+	if err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+	render.JSON(w,r,util.NewDataResponse(&struct{
+		Count int `json:"count"`
+	}{
+		Count: count,
+	}))
+}
+
+func fileList(w http.ResponseWriter,r *http.Request){
+	// 入参检查
+	claim,err := auth.GenerateClaim(r)
+	if err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+	values := r.URL.Query()
+	fileListDto := &FileListDto{
+		ID: values.Get("id"),
+	}
+	if err := fileListDto.validate();err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+
+	 if !claim.IsSuperAdmin {
+		 project,err := database.Store.Project.SelectByAdminIDAndID(claim.ID,fileListDto.ID)
+		 if err != nil {
+			 render.Render(w,r,util.ErrRender(err))
+			 return
+		 }
+		 if project == nil {
+			 render.Render(w,r,ErrProjectPremissionDenied)
+			 return
+		 }
+	 }
+
+	storagePathPrefix := viper.GetString("STORAGE_PATH_PREFIX")
+	fileutil.TouchDirAll(filepath.Join(storagePathPrefix))
+	dirPath := filepath.Join(storagePathPrefix,fileListDto.ID)
+	fileutil.TouchDirAll(dirPath)
+
+	files,err := ioutil.ReadDir(dirPath)
+
+	if err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+
+	filelist := []string{}
+
+	for _,file := range(files) {
+		if !file.IsDir() {
+			filelist = append(filelist,file.Name())
+		}
+	}
+	render.JSON(w,r,util.NewDataResponse(&struct{
+		Files []string `json:"files"`
+	}{
+		Files: filelist,
+	}))
 }

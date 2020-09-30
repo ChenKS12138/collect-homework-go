@@ -38,3 +38,45 @@ func StorageUpload(url string,projectID string,secret string,fileName string, fi
 	err = json.Unmarshal([]byte(responseString),response)
 	return response,err
 }
+
+// StorageFileCount storage file count
+func StorageFileCount(url string,token string,projectID string) (* struct {
+	BasicResponse
+	Data struct {
+		Count int `json:"count"`
+	} `json:"data"`
+},error) {
+	response := &struct {
+		BasicResponse
+		Data struct {
+			Count int `json:"count"`
+		} `json:"data"`
+	}{}
+	header := &http.Header{}
+	header.Set("Authorization","Bearer "+token)
+	err := GetRequest(url,header,map[string]string{
+		"id":projectID,
+	},response)
+	return response,err
+}
+
+// StorageFileList storage file list
+func StorageFileList(url string,token string,projectID string)(*struct {
+	BasicResponse
+	Data struct {
+		Files []string `json:"files"`
+	} `json:"data"`
+},error) {
+	response := &struct {
+		BasicResponse
+		Data struct {
+			Files []string `json:"files"`
+		} `json:"data"`
+	}{}
+	header := &http.Header{}
+	header.Set("Authorization","Bearer "+token)
+	err := GetRequest(url,header,map[string]string{
+		"id":projectID,
+	},response)
+	return response,err
+}

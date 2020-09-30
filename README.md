@@ -8,10 +8,15 @@
 
 - [collect-homework-go](#collect-homework-go)
   - [Table of Contents](#table-of-contents)
+  - [Testing](#testing)
   - [How To Run](#how-to-run)
   - [Environment Variables](#environment-variables)
   - [Support](#support)
   - [Contributing](#contributing)
+
+## Testing
+
+`HTTP Testing` See [Testing Detail](https://github.com/ChenKS12138/collect-homework-go/tree/master/testing)
 
 ## How To Run
 

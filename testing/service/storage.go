@@ -18,3 +18,28 @@ func StorageUplaod(baseURL string,secret string,projectID string,fileName string
 	}
 	return true,nil
 }
+
+// StorageFileCount storage file count
+func StorageFileCount(baseURL string,token string,projectID string) (ok bool,count int,err error){
+	response,err := request.StorageFileCount(baseURL+"/storage/fileCount",token,projectID)
+	log.Println(response)
+	if err != nil {
+		return false,0,err
+	}
+	if !response.Success {
+		return false,0,errors.New(response.ErrorText)
+	}
+	return true,response.Data.Count,nil
+}
+
+// StorageFileList storage file list
+func StorageFileList(baseURL string,token string,projectID string)(ok bool,filelist []string,err error){
+	response,err := request.StorageFileList(baseURL+"/storage/fileList",token,projectID)
+	if err != nil {
+		return false,nil,err
+	}
+	if !response.Success {
+		return false,nil,errors.New(response.ErrorText)
+	}
+	return true,response.Data.Files,nil
+}

@@ -42,4 +42,10 @@ var (
 		StatusText: "Storage Error",
 		ErrorText: "File Download Forbidden",
 	}
+	// ErrProjectPremissionDenied project permission denied
+	ErrProjectPremissionDenied = &util.ErrResponse{
+		HTTPStatusCode: http.StatusOK,
+		StatusText: "Storage Error",
+		ErrorText: "Project Permission Denied",
+	}
 )

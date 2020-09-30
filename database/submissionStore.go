@@ -30,6 +30,18 @@ func (s *SubmissionStore)SelectByProjectID(projectID string) (*model.Submission,
 	return submission,err
 }
 
+// SelectCountByProjectID select count by project id
+func (s *SubmissionStore)SelectCountByProjectID(projectID string)(int,error){
+	submissions := &[]model.Submission{}
+	count,err := s.db.Model(submissions).
+		Where("project_id = ?",projectID).
+		Count()
+	if err == pg.ErrNoRows {
+		return 0,nil
+	}
+	return count,err
+}
+
 // SelectByProjectIDAndName select by project id and name
 func (s *SubmissionStore)SelectByProjectIDAndName(projectID string,name string)(*model.Submission,error) {
 	submission:= &model.Submission{}

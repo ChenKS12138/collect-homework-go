@@ -25,7 +25,7 @@ func (u *UploadDto)validate() error {
 	return err.Filter()
 }
 
-// DownloadDto downloadDto
+// DownloadDto download dto
 type DownloadDto struct {
 	ID string `json:"id"`
 }
@@ -33,6 +33,30 @@ type DownloadDto struct {
 func (d *DownloadDto)validate() error {
 	err := &validation.Errors{
 		"id":validation.Validate(d.ID,validation.Required,is.UUIDv4),
+	}
+	return err.Filter()
+}
+
+// FileCountDto file count dto
+type FileCountDto struct {
+	ID string `json:"id"`
+}
+
+func (f *FileCountDto)validate() error {
+	err := &validation.Errors{
+		"id":validation.Validate(f.ID,validation.Required,is.UUIDv4),
+	}
+	return err.Filter()
+}
+
+// FileListDto file list dto
+type FileListDto struct {
+	ID string `json:"id"`
+}
+
+func (f *FileListDto)validate()error {
+	err := &validation.Errors{
+		"id":validation.Validate(f.ID,validation.Required,is.UUIDv4),
 	}
 	return err.Filter()
 }

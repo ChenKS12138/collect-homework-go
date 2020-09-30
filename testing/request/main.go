@@ -20,11 +20,19 @@ func init(){
 }
 
 // GetRequest get request
-func GetRequest(url string,header *http.Header,ri interface{},response interface{}) error{
+func GetRequest(url string,header *http.Header,ri map[string] string,response interface{}) error{
 	req,err := http.NewRequest("GET",url,nil)
 	if header!=nil {
 		req.Header = *header
 	}
+	query := req.URL.Query()
+	if ri != nil {
+		for key,value := range(ri){
+			query.Add(key,value)
+		}
+	}
+	req.URL.RawQuery = query.Encode()
+	
 	res,err := client.Do(req)
 	if err != nil {
 		return err
