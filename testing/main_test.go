@@ -4,6 +4,8 @@ import (
 	"collect-homework-go/api"
 	"collect-homework-go/auth"
 	"collect-homework-go/database/migrate"
+	"collect-homework-go/testing/service"
+	"collect-homework-go/util"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -66,4 +68,24 @@ func TestWelcome(t *testing.T){
 	if !strings.Contains(string(bytes),"Welcome!\nRequest From ") {
 		t.Fatal(errors.New("Wrong Welcome Format"))
 	}
+}
+
+
+type user struct {
+	Email string `json:"email"`
+	Password string `json:"password"`
+	Name string `json:"name"`
+}
+
+func generateAdmin() (token string,err error){
+	commonUser := &user{
+		Email: "generate_admin_"+util.RandString(6)+"@example.com",
+		Password: "password"+util.RandString(6),
+		Name: "admin_"+util.RandString(6),
+	}
+	_,commonUserToken,err := service.AdminRegisterAndLogin(Ts.URL,commonUser.Email,commonUser.Password,commonUser.Name)
+	if err != nil {
+		return "",err
+	}
+	return commonUserToken,err
 }

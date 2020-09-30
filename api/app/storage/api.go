@@ -185,12 +185,12 @@ func download(w http.ResponseWriter,r *http.Request){
 	}
 
 	// project 存在性检查
-	project,err := database.Store.Project.SelectByAdminIDAndID(claim.ID,downloadDto.ID)
+	project,err := database.Store.Project.SelectByID(downloadDto.ID)
 	if err != nil {
 		render.Render(w,r,util.ErrRender(err))
 		return
 	}
-	if project == nil {
+	if project == nil || (!claim.IsSuperAdmin && claim.ID != project.AdminID ) {
 		render.Render(w,r,ErrDownloadForbidden)
 		return
 	}

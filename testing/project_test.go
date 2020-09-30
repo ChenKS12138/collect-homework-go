@@ -48,29 +48,14 @@ func TestCommonAdminProjectInsert(t *testing.T){
 // GET /own
 // 仅超级管理员可查看所有项目
 func TestProjectOwn(t *testing.T){
-	type user struct {
-		Email string `json:"email"`
-		Password string `json:"password"`
-		Name string `json:"name"`
-	}
-	superUser := &user{
-		Email: SuperAdmin.Email,
-		Password: SuperAdmin.Password,
-		Name: SuperAdmin.Name,
-	}
-	commonUser := &user{
-		Email: "TestProjectOwn@example.com",
-		Password: "TestProjectOwn",
-		Name: "commonuser_"+util.RandString(6),
-	}
-	_,superUserToken,err := service.AdminLogin(Ts.URL,superUser.Email,superUser.Password)
+	_,superUserToken,err := service.AdminLogin(Ts.URL,SuperAdmin.Email,SuperAdmin.Password)
 	if err != nil {
 		t.Fatal(err)
 	}
 	commonUserProjectName := "commonUserProject_"+util.RandString(6)
 	superUserProjectName := "superUserProject_"+util.RandString(6)
 
-	_,commonUserToken,err := service.AdminRegisterAndLogin(Ts.URL,commonUser.Email,commonUser.Password,commonUser.Name)
+	commonUserToken,err := generateAdmin()
 
 	_,err = service.ProjectInsert(Ts.URL,commonUserToken,commonUserProjectName,"\\w",[]string{"doc","docx"})
 	if err != nil {
@@ -92,8 +77,7 @@ func TestProjectOwn(t *testing.T){
 	// test common user
 	testCommonUserOk := true
 	for _,project := range(*commonUserProjectOwn) {
-		if project.Name == superUserProjectName &&
-				project.AdminName == superUser.Name {
+		if project.Name == superUserProjectName  {
 			testCommonUserOk = false
 		}
 	}
@@ -104,8 +88,7 @@ func TestProjectOwn(t *testing.T){
 	// test super user
 	testSuperUserOk := false
 	for _,project := range(*superUserProjectOwn){
-		if project.Name == commonUserProjectName &&
-			project.AdminName == commonUser.Name {
+		if project.Name == commonUserProjectName  {
 			testSuperUserOk = true
 		}
 	}
@@ -117,27 +100,13 @@ func TestProjectOwn(t *testing.T){
 // POST /project/update
 // 超级管理员允许修改其他其他用户创建的project
 func TestProjectUpdate(t *testing.T){
-	type user struct {
-		Email string `json:"email"`
-		Password string `json:"password"`
-		Name string `json:"name"`
-	}
-	superUser := &user{
-		Email: SuperAdmin.Email,
-		Password: SuperAdmin.Password,
-		Name: SuperAdmin.Name,
-	}
-	commonUser := &user{
-		Email: "TestProjectUpdate@example.com",
-		Password: "TestProjectUpdate",
-		Name: "common_user_"+util.RandString(6),
-	}
+	
 
-	_,superUserToken,err := service.AdminLogin(Ts.URL,superUser.Email,superUser.Password)
+	_,superUserToken,err := service.AdminLogin(Ts.URL,SuperAdmin.Email,SuperAdmin.Password)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,commonUserToken,err := service.AdminRegisterAndLogin(Ts.URL,commonUser.Email,commonUser.Password,commonUser.Name)
+	commonUserToken,err := generateAdmin()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -195,27 +164,11 @@ func TestProjectUpdate(t *testing.T){
 }
 
 func TestProjectDelete(t *testing.T){
-	type user struct {
-		Email string `json:"email"`
-		Password string `json:"password"`
-		Name string `json:"name"`
-	}
-	superUser := &user{
-		Email: SuperAdmin.Email,
-		Password: SuperAdmin.Password,
-		Name: SuperAdmin.Name,
-	}
-	commonUser := &user{
-		Email: "TestProjectDelete@example.com",
-		Password: "TestProjectDelete",
-		Name: "common_user_"+util.RandString(6),
-	}
-
-	_,superUserToken,err := service.AdminLogin(Ts.URL,superUser.Email,superUser.Password)
+	_,superUserToken,err := service.AdminLogin(Ts.URL,SuperAdmin.Email,SuperAdmin.Password)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,commonUserToken,err := service.AdminRegisterAndLogin(Ts.URL,commonUser.Email,commonUser.Password,commonUser.Name)
+	commonUserToken,err := generateAdmin()
 	if err != nil {
 		t.Fatal(err)
 	}

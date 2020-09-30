@@ -14,16 +14,7 @@ import (
 
 // POST /storage/upload
 func TestStorageUplaod(t *testing.T){
-	userInfo := struct {
-		Email string `json:"email"`
-		Password string `json:"password"`
-		Name string `json:"name"`
-	} {
-		Email:  "testStorageUpload@example.com",
-		Password: "testStorageUpload",
-		Name: "testStorageUpload",
-	}
-	_,token,err := service.AdminRegisterAndLogin(Ts.URL,userInfo.Email,userInfo.Password,userInfo.Name)
+	token,err := generateAdmin()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,16 +37,7 @@ func TestStorageUplaod(t *testing.T){
 }
 
 func TestStorageUploadWrongExtensions(t *testing.T){
-	userInfo := struct {
-		Email string `json:"email"`
-		Password string `json:"password"`
-		Name string `json:"name"`
-	} {
-		Email:  "testStorageUploadWrongExtensions@example.com",
-		Password: "testStorageUploadWrongExtensions",
-		Name: "testStorageUploadWrongExtensions",
-	}
-	_,token,err := service.AdminRegisterAndLogin(Ts.URL,userInfo.Email,userInfo.Password,userInfo.Name)
+	token,err := generateAdmin()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,16 +60,7 @@ func TestStorageUploadWrongExtensions(t *testing.T){
 }
 
 func TestStorageUploadWrongFileName(t *testing.T){
-	userInfo := struct {
-		Email string `json:"email"`
-		Password string `json:"password"`
-		Name string `json:"name"`
-	} {
-		Email:  "testStorageUploadWrongFileName@example.com",
-		Password: "testStorageUploadWrongFileName",
-		Name: "testStorageUploadWrongFileName",
-	}
-	_,token,err := service.AdminRegisterAndLogin(Ts.URL,userInfo.Email,userInfo.Password,userInfo.Name)
+	token,err := generateAdmin()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -110,16 +83,7 @@ func TestStorageUploadWrongFileName(t *testing.T){
 }
 
 func TestStorageUploadWrongSecret(t *testing.T){
-	userInfo := struct {
-		Email string `json:"email"`
-		Password string `json:"password"`
-		Name string `json:"name"`
-	} {
-		Email:  "testStorageUploadWrongSecret@example.com",
-		Password: "testStorageUploadWrongSecret",
-		Name: "testStorageUploadWrongSecret",
-	}
-	_,token,err := service.AdminRegisterAndLogin(Ts.URL,userInfo.Email,userInfo.Password,userInfo.Name)
+	token,err := generateAdmin()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -154,27 +118,11 @@ func TestStorageUploadWrongSecret(t *testing.T){
 }
 
 func TestStorageFileCount(t *testing.T){
-	type user struct {
-		Email string `json:"email"`
-		Password string `json:"password"`
-		Name string `json:"name"`
-	}
-	superUserInfo := &user{
-		Email: SuperAdmin.Email,
-		Password: SuperAdmin.Password,
-		Name: SuperAdmin.Name,
-	}
-	commonUserInfo := &user{
-		Email:  "testStorageFileCount@example.com",
-		Password: "testStorageFileCount",
-		Name: "testStorageFileCount",
-	}
-
-	_,superUserToken,err := service.AdminLogin(Ts.URL,superUserInfo.Email,superUserInfo.Password)
+	_,superUserToken,err := service.AdminLogin(Ts.URL,SuperAdmin.Email,SuperAdmin.Password)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,commonUserToken,err := service.AdminRegisterAndLogin(Ts.URL,commonUserInfo.Email,commonUserInfo.Password,commonUserInfo.Name)
+	commonUserToken,err := generateAdmin()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -219,36 +167,19 @@ func TestStorageFileCount(t *testing.T){
 }
 
 func TestStorageFileList(t *testing.T){
-	type user struct {
-		Email string `json:"email"`
-		Password string `json:"password"`
-		Name string `json:"name"`
-	}
-	superUserInfo := &user{
-		Email: SuperAdmin.Email,
-		Password: SuperAdmin.Password,
-		Name: SuperAdmin.Name,
-	}
-	commonUserInfo := &user{
-		Email:  "testStorageFileList@example.com",
-		Password: "testStorageFileList",
-		Name: "testStorageFileList",
-	}
-	commonUserInfo2 := &user{
-		Email:  "testStorageFileList2@example.com",
-		Password: "testStorageFileList2",
-		Name: "testStorageFileList2",
-	}
 	projectNames := []string{ "B11111111-陈陈陈-实验1.doc", "B11111112-陈陈-实验1.doc"}
-	_,superUserToken,err := service.AdminLogin(Ts.URL,superUserInfo.Email,superUserInfo.Password)
+	_,superUserToken,err := service.AdminLogin(Ts.URL,SuperAdmin.Email,SuperAdmin.Password)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,commonUserToken,err := service.AdminRegisterAndLogin(Ts.URL,commonUserInfo.Email,commonUserInfo.Password,commonUserInfo.Name)
+	commonUserToken,err := generateAdmin()
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,commonUserToken2,err := service.AdminRegisterAndLogin(Ts.URL,commonUserInfo2.Email,commonUserInfo2.Password,commonUserInfo2.Name)
+	commonUserToken2,err := generateAdmin()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	_,err = service.ProjectInsert(Ts.URL,commonUserToken,"test_storage_upload_wrong_secret_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"})
 	if err != nil {
@@ -293,5 +224,57 @@ func TestStorageFileList(t *testing.T){
 	ok,_,err := service.StorageFileList(Ts.URL,commonUserToken2,projectID)
 	if ok || !strings.Contains(err.Error(),storage.ErrProjectPremissionDenied.ErrorText) {
 		t.Fatal(errors.New("Test Storage File List Fail (Super User2)"))
+	}
+}
+
+func TestStorageDownload(t *testing.T){
+	projectNames := []string{ "B11111111-陈陈陈-实验1.doc", "B11111112-陈陈-实验1.doc"}
+	_,superUserToken,err := service.AdminLogin(Ts.URL,SuperAdmin.Email,SuperAdmin.Password)
+	if err != nil {
+		t.Fatal(err)
+	}
+	commonUserToken,err := generateAdmin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	commonUserToken2,err := generateAdmin()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_,err = service.ProjectInsert(Ts.URL,commonUserToken,"test_storage_upload_wrong_secret_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_,projects,err := service.ProjectOwn(Ts.URL,commonUserToken)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(*projects) != 1 {
+		t.Fatal(errors.New("Project Insert Abnormal"))
+	}
+	projectID := (*projects)[0].ID
+	_,err = service.StorageUplaod(Ts.URL,util.RandString(6),projectID,projectNames[0],fileBytes.Docx)
+	if err != nil{
+		t.Fatal(err)
+	}
+	_,err = service.StorageUplaod(Ts.URL,util.RandString(6),projectID,projectNames[1],fileBytes.Docx)
+	if err != nil{
+		t.Fatal(err)
+	}
+
+	_,err = service.StorageDownload(Ts.URL,commonUserToken,projectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_,err = service.StorageDownload(Ts.URL,superUserToken,projectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ok,err := service.StorageDownload(Ts.URL,commonUserToken2,projectID)
+	if ok || ! strings.Contains(err.Error(),"Not Bytes Stream") {
+		t.Fatal("Storage Download Fail")
 	}
 }

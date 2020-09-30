@@ -43,3 +43,8 @@ func StorageFileList(baseURL string,token string,projectID string)(ok bool,filel
 	}
 	return true,response.Data.Files,nil
 }
+
+// StorageDownload storage download
+func StorageDownload(baseURL string,token string,projectID string) (ok bool,err error){
+	return request.StorageDownload(baseURL+"/storage/download",token,projectID)
+}
