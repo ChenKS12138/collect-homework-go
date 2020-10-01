@@ -88,3 +88,16 @@ func AdminRegister(baseURL string,email string,password string,name string,invit
 	}
 	return true,nil
 }
+
+// AdminStatus admin status
+func AdminStatus(baseURL string,token string) (bool,*struct{
+	FileCount int `json:"fileCount"`
+	ProjectCount int `json:"projectCount"`
+	TotalSize int64 `json:"totalSize"`
+},error) {
+	result,err := request.AdminStatus(baseURL+"/admin/status",token)
+	if err != nil {
+		return false,nil,err
+	}
+	return true,result,nil
+}

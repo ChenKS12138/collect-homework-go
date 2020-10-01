@@ -61,3 +61,16 @@ func (s *SubmissionStore)Insert(submission *model.Submission) error {
 	_,err := s.db.Model(submission).Insert();
 	return err
 }
+
+// SelectCountByAdminID count by admin id
+func (s *SubmissionStore)SelectCountByAdminID(adminID string) (int ,error){
+	count,err := s.db.Model(&model.Submission{}).
+		Join("LEFT JOIN projects").
+		JoinOn(`submission."project_id" = projects."id"`).
+		Where(`projects."admin_id" = ?`,adminID).
+		Count()
+	if err == pg.ErrNoRows {
+		return 0,nil
+	}
+	return count,err
+}

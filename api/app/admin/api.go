@@ -3,6 +3,7 @@ package admin
 import (
 	"log"
 	"net/http"
+	"path/filepath"
 	"time"
 
 	"collect-homework-go/auth"
@@ -12,6 +13,7 @@ import (
 	"collect-homework-go/template"
 	"collect-homework-go/util"
 
+	"github.com/coreos/etcd/pkg/fileutil"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
@@ -28,6 +30,7 @@ func Router()(*chi.Mux ,error){
 		c.Use(jwtauth.Verifier(auth.TokenAuth))
 		c.Use(jwtauth.Authenticator)
 		
+		c.Get("/status",status)
 	})
 
 	// public router
@@ -157,3 +160,50 @@ func register(w http.ResponseWriter, r *http.Request){
 	}
 	render.JSON(w,r,util.NewDataResponse(true))
 }
+
+// status
+func status(w http.ResponseWriter, r *http.Request) {
+	claim,err := auth.GenerateClaim(r)
+	if err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+
+	fileCount,err := database.Store.Submission.SelectCountByAdminID(claim.ID)
+	if err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+	projects,err := database.Store.Project.SelectByAdminID(claim.ID)
+	if err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+	projectCount := len(*projects)
+
+	storagePathPrefix := viper.GetString("STORAGE_PATH_PREFIX")
+	fileutil.TouchDirAll(filepath.Join(storagePathPrefix))
+
+	totalSize := int64(0)
+	for _,project := range(*projects) {
+		dirPath := filepath.Join(storagePathPrefix,project.ID) 
+		fileutil.TouchDirAll(dirPath)
+		size,err := util.DirSizeB(dirPath)
+		if err != nil {
+			render.Render(w,r,util.ErrRender(err))
+			return
+		}
+		totalSize+=size
+	}
+
+	render.JSON(w,r,util.NewDataResponse(&struct{
+		FileCount int `json:"fileCount"`
+		ProjectCount int `json:"projectCount"`
+		TotalSize int64 `json:"totalSize"`
+	} {
+		FileCount: fileCount,
+		ProjectCount: projectCount,
+		TotalSize: totalSize,
+	}))
+}
+

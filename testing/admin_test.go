@@ -120,3 +120,8 @@ func TestAdminRegisterWrongCode(t *testing.T){
 		t.Fatal("Test Admin Register Wrong Code Fail")
 	}
 }
+
+// GET /admin/status
+func TestAdminStatus(t * testing.T){
+	
+}
