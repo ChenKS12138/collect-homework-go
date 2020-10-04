@@ -27,13 +27,14 @@ func (i *InsertDto)validate() error {
 type UpdateDto struct {
 	ID string `json:"id"`
 	Usable bool `json:"usable"`
-	InsertDto
+	FileNamePattern string `json:"fileNamePattern,omitempty"`
+	FileNameExtensions []string `json:"fileNameExtensions,omitempty"`
+	FileNameExample string 	`json:"fileNameExample,omitempty"`
 }
 
 func (u *UpdateDto)validate() error {
 	err := &validation.Errors{
 		"id":validation.Validate(u.ID,validation.Required,is.UUIDv4),
-		"name":validation.Validate(u.Name,validation.Required),
 		"fileNamePattern": validation.Validate(u.FileNamePattern,validation.Required),
 		"fileNameExtensions":validation.Validate(u.FileNameExtensions,validation.Required),
 		"fileNameExample":validation.Validate(u.FileNameExample,validation.Required),
@@ -48,6 +49,18 @@ type DeleteDto struct {
 }
 
 func (d *DeleteDto)validate() error {
+	err := &validation.Errors{
+		"id":validation.Validate(d.ID,validation.Required,is.UUIDv4),
+	}
+	return err.Filter()
+}
+
+// RestoreDto delete dto
+type RestoreDto struct {
+	ID string `json:"id"`
+}
+
+func (d *RestoreDto)validate() error {
 	err := &validation.Errors{
 		"id":validation.Validate(d.ID,validation.Required,is.UUIDv4),
 	}

@@ -52,7 +52,7 @@ func (p *ProjectStore)SelectAllWithName()(*[]model.ProjectWithAdminName,error) {
 	err := p.db.Model(projects).
 		Join("LEFT JOIN admins admin").
 		JoinOn(`project."admin_id" = admin."id"`).
-		ColumnExpr(`project."name",project."id",project."file_name_pattern",project."file_name_extensions",project."file_name_example",project."create_at",project."update_at"`).
+		ColumnExpr(`project."name",project."id",project."file_name_pattern",project."file_name_extensions",project."file_name_example",project."create_at",project."update_at",project."usable"`).
 		ColumnExpr(`admin."name" AS admin_name`).
 		Select()
 	if err == pg.ErrNoRows {
@@ -65,8 +65,12 @@ func (p *ProjectStore)SelectAllWithName()(*[]model.ProjectWithAdminName,error) {
 func (p *ProjectStore)SelectByAdminID(adminID string) (*[]model.ProjectWithAdminName,error) {
 	projects := &[]model.ProjectWithAdminName{}
 	err := p.db.Model(projects).
+		Join("LEFT JOIN admins admin").
+		JoinOn(`project."admin_id" = admin."id"`).
 		Where("admin_id = ?",adminID).
-		Column("id","name","file_name_pattern","file_name_extensions","file_name_example","create_at","update_at").
+		Where("usable = TRUE").
+		ColumnExpr(`project."name",project."id",project."file_name_pattern",project."file_name_extensions",project."file_name_example",project."create_at",project."update_at",project."usable"`).
+		ColumnExpr(`admin."name" AS admin_name`).
 		Select();
 	if err == pg.ErrNoRows {
 		return nil,nil

@@ -25,7 +25,8 @@ func Router()(*chi.Mux,error){
 		c.Post("/insert",insert)
 		c.Post("/update",update)
 		// 不使用真正的delete
-		// r.Post("/delete",delete)
+		c.Post("/delete",delete)
+		c.Post("/restore",restore)
 	})
 
 	// public router
@@ -35,6 +36,7 @@ func Router()(*chi.Mux,error){
 	return r,nil
 }
 
+// own
 func own(w http.ResponseWriter,r *http.Request){
 	claim,err := auth.GenerateClaim(r)
 	if err != nil {
@@ -123,12 +125,80 @@ func update(w http.ResponseWriter,r *http.Request){
 		render.Render(w,r,ErrProjectPermission)
 		return
 	}
-	lastProject.Name = updateDto.Name
 	lastProject.FileNamePattern = updateDto.FileNamePattern
 	lastProject.FileNameExtensions = updateDto.FileNameExtensions
 	lastProject.FileNameExample = updateDto.FileNameExample
 	lastProject.Usable = updateDto.Usable
 
+	if err = database.Store.Project.Update(lastProject);err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+	render.JSON(w,r,util.NewDataResponse(true))
+}
+
+
+// delete
+func delete(w http.ResponseWriter,r *http.Request){
+	claim,err := auth.GenerateClaim(r)
+	if err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+	deleteDto := &DeleteDto{}
+	render.DecodeJSON(r.Body,deleteDto)
+	if err = deleteDto.validate();err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+	lastProject,err := database.Store.Project.SelectByID(deleteDto.ID)
+
+	if lastProject == nil {
+		render.Render(w,r,ErrProjectNotFound)
+	}
+	if err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+	if !claim.IsSuperAdmin && lastProject.AdminID != claim.ID {
+		render.Render(w,r,ErrProjectPermission)
+		return
+	}
+	lastProject.Usable = false
+	if err = database.Store.Project.Update(lastProject);err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+	render.JSON(w,r,util.NewDataResponse(true))
+}
+
+// restore
+func restore(w http.ResponseWriter,r *http.Request){
+	claim,err := auth.GenerateClaim(r)
+	if err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+	restoreDto := &RestoreDto{}
+	render.DecodeJSON(r.Body,restoreDto)
+	if err = restoreDto.validate();err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+	lastProject,err := database.Store.Project.SelectByID(restoreDto.ID)
+
+	if lastProject == nil {
+		render.Render(w,r,ErrProjectNotFound)
+	}
+	if err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+	if !claim.IsSuperAdmin {
+		render.Render(w,r,ErrProjectPermission)
+		return
+	}
+	lastProject.Usable = true
 	if err = database.Store.Project.Update(lastProject);err != nil {
 		render.Render(w,r,util.ErrRender(err))
 		return
