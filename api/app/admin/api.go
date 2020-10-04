@@ -81,7 +81,7 @@ func invitationCode(w http.ResponseWriter,r *http.Request){
 
 	lastInvitationCode,err := database.Store.InvitationCode.SelectByEmail(invitationCodeDto.Email)
 
-	if lastInvitationCode != nil && lastInvitationCode.CreateAt.Before(time.Now().Add(time.Minute)) {
+	if lastInvitationCode != nil && lastInvitationCode.CreateAt.Add(time.Minute).After(time.Now()) {
 		render.Render(w,r,ErrInvitationCodeFrequently)
 		return
 	}
@@ -200,10 +200,14 @@ func status(w http.ResponseWriter, r *http.Request) {
 		FileCount int `json:"fileCount"`
 		ProjectCount int `json:"projectCount"`
 		TotalSize int64 `json:"totalSize"`
+		Username string `json:"username"`
+		Email string `json:"email"`
 	} {
 		FileCount: fileCount,
 		ProjectCount: projectCount,
 		TotalSize: totalSize,
+		Username: claim.Name,
+		Email: claim.Email,
 	}))
 }
 

@@ -24,7 +24,7 @@ func (s *InvitationCodeStore)SelectByEmail(email string) (*model.InvitationCode,
 	err := s.db.Model(invitationCode).
 		Where("email = ?",email).
 		Order("create_at DESC").
-		Select();
+		First();
 	if err == pg.ErrNoRows {
 		return nil,nil
 	}
