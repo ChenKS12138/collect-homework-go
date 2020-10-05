@@ -200,7 +200,7 @@ func download(w http.ResponseWriter,r *http.Request){
 	dirPath := filepath.Join(storagePathPrefix,project.ID)
 	fileutil.TouchDirAll(dirPath)
 	zipFilePath := filepath.Join(storagePathPrefix,project.Name+"-"+string(time.Now().Unix())+".zip")
-	err = util.Zip(zipFilePath,dirPath)
+	err = util.Zip(dirPath,zipFilePath)
 	if err != nil {
 		render.Render(w,r,util.ErrRender(err))
 		return
