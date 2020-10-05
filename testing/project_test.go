@@ -52,16 +52,16 @@ func TestProjectOwn(t *testing.T){
 	if err != nil {
 		t.Fatal(err)
 	}
-	commonUserProjectName := "commonUserProject_"+util.RandString(6)
-	superUserProjectName := "superUserProject_"+util.RandString(6)
+	commonUserProjectFileNameExample := "commonUserProject_filename_example"+util.RandString(10)
+	superUserProjectFileNameExample := "superUserProject_filename_example"+util.RandString(10)
 
 	commonUserToken,err := generateAdmin()
 
-	_,err = service.ProjectInsert(Ts.URL,commonUserToken,commonUserProjectName,"\\w",[]string{"doc","docx"})
+	_,err = service.ProjectInsert(Ts.URL,commonUserToken,commonUserProjectFileNameExample,"\\w",[]string{"doc","docx"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.ProjectInsert(Ts.URL,superUserToken,superUserProjectName,"\\w",[]string{"doc","docx"})
+	_,err = service.ProjectInsert(Ts.URL,superUserToken,superUserProjectFileNameExample,"\\w",[]string{"doc","docx"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,7 +77,7 @@ func TestProjectOwn(t *testing.T){
 	// test common user
 	testCommonUserOk := true
 	for _,project := range(*commonUserProjectOwn) {
-		if project.Name == superUserProjectName  {
+		if project.FileNameExample == superUserProjectFileNameExample  {
 			testCommonUserOk = false
 		}
 	}
@@ -88,7 +88,7 @@ func TestProjectOwn(t *testing.T){
 	// test super user
 	testSuperUserOk := false
 	for _,project := range(*superUserProjectOwn){
-		if project.Name == commonUserProjectName  {
+		if project.FileNameExample == commonUserProjectFileNameExample  {
 			testSuperUserOk = true
 		}
 	}
@@ -111,10 +111,10 @@ func TestProjectUpdate(t *testing.T){
 		t.Fatal(err)
 	}
 
-	oldProjectName := "test_project_update_"+util.RandString(6)
-	newProjectName := "test_project_update_"+util.RandString(6)
+	newFileNameExample := "test_project_update_filename_example"+util.RandString(6)
+	oldFileNameExample := "test_project_update_filename_example"+util.RandString(6)
 
-	_,err = service.ProjectInsert(Ts.URL,commonUserToken,oldProjectName,"\\w",[]string{"doc","docx"})
+	_,err = service.ProjectInsert(Ts.URL,commonUserToken,oldFileNameExample,"\\w",[]string{"doc","docx"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -129,7 +129,7 @@ func TestProjectUpdate(t *testing.T){
 	targetProjectID := (*projects)[0].ID
 
 	// common user update project name
-	_,err = service.ProjectUpdateName(Ts.URL,commonUserToken,targetProjectID,newProjectName)
+	_,err = service.ProjectUpdateName(Ts.URL,commonUserToken,targetProjectID,newFileNameExample)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -137,7 +137,7 @@ func TestProjectUpdate(t *testing.T){
 	commonUserUpdateProjectNameOk := false
 	for _,project := range(*projects){
 		if project.ID == targetProjectID &&
-			project.Name == newProjectName {
+			project.FileNameExample == newFileNameExample {
 				commonUserUpdateProjectNameOk = true
 			}
 	}
@@ -146,7 +146,7 @@ func TestProjectUpdate(t *testing.T){
 	}
 
 	// super user update project name
-	_,err = service.ProjectUpdateName(Ts.URL,superUserToken,targetProjectID,oldProjectName)
+	_,err = service.ProjectUpdateName(Ts.URL,superUserToken,targetProjectID,oldFileNameExample)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -154,7 +154,7 @@ func TestProjectUpdate(t *testing.T){
 	superUserUpdateProjectNameOk := false
 	for _,project := range(*projects){
 		if project.ID == targetProjectID &&
-			project.Name == oldProjectName {
+			project.FileNameExample == oldFileNameExample {
 				superUserUpdateProjectNameOk = true
 			}
 	}
@@ -173,15 +173,15 @@ func TestProjectDelete(t *testing.T){
 		t.Fatal(err)
 	}
 	
-	projectName1 := "common_user_delete_1_"+util.RandString(6)
-	projectName2 := "common_user_delete_2_"+util.RandString(6)
+	fileNameExample1 := "common_user_delete_1_filename_example"+util.RandString(10)
+	fileNameExample2 := "common_user_delete_2_filename_example"+util.RandString(10)
 
 	// insert
-	_,err = service.ProjectInsert(Ts.URL,commonUserToken,projectName1,"\\w",[]string{"doc","docx"})
+	_,err = service.ProjectInsert(Ts.URL,commonUserToken,fileNameExample1,"\\w",[]string{"doc","docx"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.ProjectInsert(Ts.URL,commonUserToken,projectName2,"\\w",[]string{"doc","docx"})
+	_,err = service.ProjectInsert(Ts.URL,commonUserToken,fileNameExample2,"\\w",[]string{"doc","docx"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -194,11 +194,11 @@ func TestProjectDelete(t *testing.T){
 	projectID1 := ""
 	projectID2 := ""
 	for _,project := range(*projects){
-		switch project.Name {
-		case projectName1:
+		switch project.FileNameExample {
+		case fileNameExample1:
 			projectExist1 = true
 			projectID1= project.ID
-		case projectName2:
+		case fileNameExample2:
 			projectExist2 = true
 			projectID2 = project.ID
 		}
@@ -225,9 +225,9 @@ func TestProjectDelete(t *testing.T){
 	projectExist2 = false
 	for _,project := range(*projects){
 		switch project.Name {
-		case projectName1:
+		case fileNameExample1:
 			projectExist1 = true
-		case projectName2:
+		case fileNameExample2:
 			projectExist2 = true
 		}
 	}

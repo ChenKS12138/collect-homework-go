@@ -3,6 +3,7 @@ package service
 import (
 	"collect-homework-go/model"
 	"collect-homework-go/testing/request"
+	"collect-homework-go/util"
 	"errors"
 	"log"
 )
@@ -21,17 +22,17 @@ func ProjectList(baseURL string) (ok bool,projects *[]model.ProjectWithAdminName
 }
 
 // ProjectInsert project insert
-func ProjectInsert(baseURL string,token string,projectName string,pattern string,extensions []string) (ok bool,err error){
+func ProjectInsert(baseURL string,token string,fileNameExample string,pattern string,extensions []string) (ok bool,err error){
 	newProject :=  &struct {
 		Name string `json:"name"`
 		FileNamePattern string `json:"fileNamePattern"`
 		FileNameExtensions []string `json:"fileNameExtensions"`
 		FileNameExample string `json:"fileNameExample"`
 	} {
-		Name: projectName,
+		Name: "project_name_"+util.RandString(10),
 		FileNamePattern: pattern,
 		FileNameExtensions: extensions,
-		FileNameExample: "B123456-cattchen.doc",
+		FileNameExample: fileNameExample,
 	}
 	_,projectsBefore,err := ProjectList(baseURL)
 	if err != nil {
@@ -85,7 +86,7 @@ func ProjectOwn(baseURL string,token string)(ok bool,projects *[]model.ProjectWi
 }
 
 // ProjectUpdateName project name
-func ProjectUpdateName(baseURL string,token string,projectID string,projectName string)(ok bool,err error){
+func ProjectUpdateName(baseURL string,token string,projectID string,fileNameExample string)(ok bool,err error){
 	_,projects,err := ProjectOwn(baseURL,token)
 	if err != nil {
 		return false,err
@@ -95,11 +96,11 @@ func ProjectUpdateName(baseURL string,token string,projectID string,projectName 
 	for _,project := range(*projects){
 		if project.ID == projectID {
 			found = true
-			targetProject.FileNameExample = project.FileNameExample
+			targetProject.FileNameExample = fileNameExample
 			targetProject.FileNameExtensions = project.FileNameExtensions
 			targetProject.FileNamePattern = project.FileNamePattern
 			targetProject.ID = project.ID
-			targetProject.Name = projectName
+			// targetProject.Name = projectName
 		}
 	}
 	if !found {
