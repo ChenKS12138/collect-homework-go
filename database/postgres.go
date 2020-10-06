@@ -8,7 +8,7 @@ import (
 
 // DBConn db connectim
 func DBConn() (*pg.DB,error) {
-	viper.AutomaticEnv()
+	// viper.AutomaticEnv()
 	db :=pg.Connect(&pg.Options{
 		Network: viper.GetString("DB_NETWORK"),
 		Addr: viper.GetString("DB_ADDR"),

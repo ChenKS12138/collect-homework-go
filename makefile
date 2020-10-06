@@ -22,5 +22,8 @@ test:
 build:
 	@go build -o ./build/main main.go
 
+build-linux:
+	@env GOOS=linux GOARCH=amd64 go build -o ./build/main main.go
+
 clean:
 	@rm -rf ./build ./tmp
