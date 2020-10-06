@@ -1,6 +1,8 @@
 package email
 
 import (
+	"crypto/tls"
+
 	"github.com/spf13/viper"
 	"gopkg.in/mail.v2"
 )
@@ -13,7 +15,7 @@ func SendMail(to string,subject string,body string) error {
 	user := viper.GetString("EMAIL_USER")
 	password := viper.GetString("EMAIL_PASSWORD")
 	dialer := mail.NewDialer("smtp.qq.com",587,user,password)
-	dialer.StartTLSPolicy = mail.MandatoryStartTLS
+	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 
 	m := mail.NewMessage()
 	m.SetHeader("From",user)
