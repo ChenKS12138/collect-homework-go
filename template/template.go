@@ -27,7 +27,7 @@ func Registry(code string,email string, t time.Time) (string,error) {
 }
 
 // Submission submission
-func Submission(projectName string,status string,fileName string, t time.Time,ip string)(string,error){
+func Submission(projectName string,status string,fileName string, t time.Time,ip string,md5Str string)(string,error){
 	tmpl,err := template.New("submission").Parse(mailTemplate.SubmissionTemplate)
 	if err != nil {
 		return "",err
@@ -39,12 +39,14 @@ func Submission(projectName string,status string,fileName string, t time.Time,ip
 		FileName string;
 		Time string;
 		IP string;
+		Md5Str string;
 	}{
 		ProjectName: projectName,
 		Status: status,
 		FileName: fileName,
 		Time: t.Format("Mon Jan 2 15:04:05 -0700 MST 2006"),
 		IP: ip,
+		Md5Str: md5Str,
 	})
 	return buf.String(),nil
 }

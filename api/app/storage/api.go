@@ -7,6 +7,8 @@ import (
 	"collect-homework-go/model"
 	"collect-homework-go/template"
 	"collect-homework-go/util"
+	"crypto/md5"
+	"encoding/hex"
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
@@ -138,12 +140,16 @@ func upload(w http.ResponseWriter,r *http.Request){
 		render.Render(w,r,util.ErrRender(err))
 		return
 	}
+	m:= md5.New()
+	m.Write(fileBytes);
+	md5Str := hex.EncodeToString(m.Sum(nil))
 	submission := &model.Submission{
 		FileName: uploadDto.FileHeader.Filename,
 		IP: ip,
 		ProjectID: uploadDto.ProjectID,
 		FilePath: filePath,
 		Secret: string(secret),
+		MD5: md5Str,
 	}
 	if err= database.Store.Submission.Insert(submission);err !=nil {
 		render.Render(w,r,util.ErrRender(err))
@@ -153,7 +159,7 @@ func upload(w http.ResponseWriter,r *http.Request){
 	if lastSubmission != nil {
 		statusText = statusAlter
 	}
-	mailText,err := template.Submission(lastProject.Name,statusText,uploadDto.FileHeader.Filename,time.Now(),ip)
+	mailText,err := template.Submission(lastProject.Name,statusText,uploadDto.FileHeader.Filename,time.Now(),ip,md5Str)
 	if err!=nil {
 		render.Render(w,r,util.ErrRender(err))
 		return

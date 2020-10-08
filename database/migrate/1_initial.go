@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS submissions (
 	secret text NOT NULL,
 	file_name text NOT NULL,
 	file_path text NOT NULL,
+	md5 text NOT NULL,
 	create_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	update_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	ip text,

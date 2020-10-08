@@ -13,6 +13,7 @@ type Submission struct {
 	Secret string `json:"secret,omitempty" pg:"secret"`
 	FileName string `json:"fileName,omitempty" pg:"file_name"`
 	FilePath string `json:"filePath,omitempty" pg:"file_path"`
+	MD5 string `json:"md5,omitempty" pg:"md5"`
 	CreateAt time.Time `json:"createAt,omitempty" pg:"create_at"`
 	UpdateAt time.Time `json:"updateAt,omitempty" pg:"update_at"`
 	IP string `json:"ip,omitempty" pg:"ip"`
