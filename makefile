@@ -20,10 +20,10 @@ test:
 	@go test -v ./testing
 
 build:
-	@go build -o ./build/main main.go
+	@env GOOS=darwin GOARCH=amd64 go build -o ./build/main-darwin-64 main.go
 
 build-linux:
-	@env GOOS=linux GOARCH=amd64 go build -o ./build/main main.go
+	@env GOOS=linux GOARCH=amd64 go build -o ./build/main-linux-64 main.go
 
 clean:
 	@rm -rf ./build ./tmp
