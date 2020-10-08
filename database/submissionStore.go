@@ -67,6 +67,7 @@ func (s *SubmissionStore)SelectCountByAdminID(adminID string) (int ,error){
 	count,err := s.db.Model(&model.Submission{}).
 		Join("LEFT JOIN projects").
 		JoinOn(`submission."project_id" = projects."id"`).
+		DistinctOn(`submission."file_name"`).
 		Where(`projects."admin_id" = ?`,adminID).
 		Count()
 	if err == pg.ErrNoRows {
