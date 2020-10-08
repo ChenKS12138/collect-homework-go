@@ -145,11 +145,9 @@ func upload(w http.ResponseWriter,r *http.Request){
 		FilePath: filePath,
 		Secret: string(secret),
 	}
-	if lastSubmission == nil {
-		if err= database.Store.Submission.Insert(submission);err !=nil {
-			render.Render(w,r,util.ErrRender(err))
-			return
-		}
+	if err= database.Store.Submission.Insert(submission);err !=nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
 	}
 	statusText :=statusCreate
 	if lastSubmission != nil {
