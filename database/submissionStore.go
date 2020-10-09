@@ -35,6 +35,7 @@ func (s *SubmissionStore)SelectCountByProjectID(projectID string)(int,error){
 	submissions := &[]model.Submission{}
 	count,err := s.db.Model(submissions).
 		Where("project_id = ?",projectID).
+		DistinctOn(`submission."file_name"`).
 		Count()
 	if err == pg.ErrNoRows {
 		return 0,nil
