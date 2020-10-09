@@ -69,6 +69,7 @@ func (s *SubmissionStore)SelectCountByAdminID(adminID string) (int ,error){
 		JoinOn(`submission."project_id" = projects."id"`).
 		DistinctOn(`submission."file_name"`).
 		Where(`projects."admin_id" = ?`,adminID).
+		Where(`projects."usable" = TRUE`).
 		Count()
 	if err == pg.ErrNoRows {
 		return 0,nil
