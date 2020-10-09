@@ -101,24 +101,29 @@ func upload(w http.ResponseWriter,r *http.Request){
 
 	// 文件名/扩展名 正则检验
 	fileNamePrefix := uploadDto.FileHeader.Filename
-	fileNameExtensionCollections := collection.Collect(lastProject.FileNameExtensions)
-	if fileNameExtensionCollections.Count() > 0 {
-		dotIndex := strings.LastIndex(fileNamePrefix,textDot)
-		if !fileNameExtensionCollections.Contains(fileNamePrefix[(dotIndex+1):]) {
-			render.Render(w,r,ErrFileNameExtensions)
+	if len(lastProject.FileNameExample)!=0 {
+		fileNameExtensionCollections := collection.Collect(lastProject.FileNameExtensions)
+		if fileNameExtensionCollections.Count() > 0 {
+			dotIndex := strings.LastIndex(fileNamePrefix,textDot)
+			if !fileNameExtensionCollections.Contains(fileNamePrefix[(dotIndex+1):]) {
+				render.Render(w,r,ErrFileNameExtensions)
+				return
+			}
+			fileNamePrefix = fileNamePrefix[:(dotIndex)]
+		}
+	}
+	if len(lastProject.FileNamePattern)!=0 {
+		ok,err := regexp.Match(lastProject.FileNamePattern,[]byte(fileNamePrefix))
+		if err!=nil {
+			render.Render(w,r,util.ErrRender(err))
 			return
 		}
-		fileNamePrefix = fileNamePrefix[:(dotIndex)]
+		if !ok {
+			render.Render(w,r,ErrFileNamePattern)
+			return
+		}
 	}
-	ok,err := regexp.Match(lastProject.FileNamePattern,[]byte(fileNamePrefix))
-	if err!=nil {
-		render.Render(w,r,util.ErrRender(err))
-		return
-	}
-	if !ok {
-		render.Render(w,r,ErrFileNamePattern)
-		return
-	}
+	
 
 	// 文件写入&记录存储&邮件发送
 	storagePathPrefix := viper.GetString("STORAGE_PATH_PREFIX")
