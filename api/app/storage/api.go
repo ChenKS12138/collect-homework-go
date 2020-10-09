@@ -160,19 +160,21 @@ func upload(w http.ResponseWriter,r *http.Request){
 		render.Render(w,r,util.ErrRender(err))
 		return
 	}
-	statusText :=statusCreate
-	if lastSubmission != nil {
-		statusText = statusAlter
-	}
-	mailText,err := template.Submission(lastProject.Name,statusText,uploadDto.FileHeader.Filename,time.Now(),ip,md5Str)
-	if err!=nil {
-		render.Render(w,r,util.ErrRender(err))
-		return
-	}
-	err = email.SendMail(lastProject.AdminEmail,"New Submission",mailText)
-	if err!=nil {
-		render.Render(w,r,util.ErrRender(err))
-		return
+	if lastProject.SendEmail {
+		statusText :=statusCreate
+		if lastSubmission != nil {
+			statusText = statusAlter
+		}
+		mailText,err := template.Submission(lastProject.Name,statusText,uploadDto.FileHeader.Filename,time.Now(),ip,md5Str)
+		if err!=nil {
+			render.Render(w,r,util.ErrRender(err))
+			return
+		}
+		err = email.SendMail(lastProject.AdminEmail,"New Submission",mailText)
+		if err!=nil {
+			render.Render(w,r,util.ErrRender(err))
+			return
+		}
 	}
 	render.JSON(w,r,util.NewDataResponse(true))
 }

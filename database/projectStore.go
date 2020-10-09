@@ -52,7 +52,7 @@ func (p *ProjectStore)SelectAllWithName()(*[]model.ProjectWithAdminName,error) {
 	err := p.db.Model(projects).
 		Join("LEFT JOIN admins admin").
 		JoinOn(`project."admin_id" = admin."id"`).
-		ColumnExpr(`project."name",project."id",project."file_name_pattern",project."file_name_extensions",project."file_name_example",project."create_at",project."update_at",project."usable"`).
+		ColumnExpr(`project."name",project."id",project."file_name_pattern",project."file_name_extensions",project."file_name_example",project."create_at",project."update_at",project."usable",project."visible",project."send_email"`).
 		ColumnExpr(`admin."name" AS admin_name`).
 		Order("create_at DESC").
 		Select()
@@ -70,7 +70,7 @@ func (p *ProjectStore)SelectByAdminID(adminID string) (*[]model.ProjectWithAdmin
 		JoinOn(`project."admin_id" = admin."id"`).
 		Where("admin_id = ?",adminID).
 		Where("usable = TRUE").
-		ColumnExpr(`project."name",project."id",project."file_name_pattern",project."file_name_extensions",project."file_name_example",project."create_at",project."update_at",project."usable"`).
+		ColumnExpr(`project."name",project."id",project."file_name_pattern",project."file_name_extensions",project."file_name_example",project."create_at",project."update_at",project."usable",project."visible",project."send_email"`).
 		ColumnExpr(`admin."name" AS admin_name`).
 		Order("create_at DESC").
 		Select();
@@ -99,6 +99,7 @@ func (p *ProjectStore)SelectAllUsable() (*[]model.ProjectWithAdminName,error) {
 	projects := &[]model.ProjectWithAdminName{}
 	err := p.db.Model(projects).
 		Where("usable = ?",true).
+		Where("visible = ?",true).
 		Join("LEFT JOIN admins admin").
 		JoinOn(`project."admin_id" = admin."id"`).
 		ColumnExpr(`project."name",project."id",project."file_name_pattern",project."file_name_extensions",project."file_name_example",project."create_at",project."update_at"`).

@@ -129,6 +129,8 @@ func update(w http.ResponseWriter,r *http.Request){
 	lastProject.FileNameExtensions = updateDto.FileNameExtensions
 	lastProject.FileNameExample = updateDto.FileNameExample
 	lastProject.Usable = updateDto.Usable
+	lastProject.SendEmail = updateDto.SendEmail
+	lastProject.Visible = updateDto.Visible
 
 	if err = database.Store.Project.Update(lastProject);err != nil {
 		render.Render(w,r,util.ErrRender(err))

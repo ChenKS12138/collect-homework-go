@@ -30,6 +30,8 @@ type UpdateDto struct {
 	FileNamePattern string `json:"fileNamePattern"`
 	FileNameExtensions []string `json:"fileNameExtensions"`
 	FileNameExample string 	`json:"fileNameExample"`
+	SendEmail bool `json:"sendEmail"`
+	Visible bool `json:"visible"`
 }
 
 func (u *UpdateDto)validate() error {
