@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -221,6 +222,7 @@ func download(w http.ResponseWriter,r *http.Request){
 		render.Render(w,r,util.ErrRender(err))
 		return
 	}
+	w.Header().Set("Content-Length",strconv.FormatInt(int64(len(zipBytes)),10))
 	render.Data(w,r,zipBytes)
 }
 
