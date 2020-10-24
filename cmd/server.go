@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"collect-homework-go/api"
+	"github.com/ChenKS12138/collect-homework-go/api"
 
 	"github.com/spf13/cobra"
 )

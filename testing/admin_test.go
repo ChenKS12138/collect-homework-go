@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"collect-homework-go/api/app/admin"
-	"collect-homework-go/database"
-	"collect-homework-go/testing/service"
+	"github.com/ChenKS12138/collect-homework-go/api/app/admin"
+	"github.com/ChenKS12138/collect-homework-go/database"
+	"github.com/ChenKS12138/collect-homework-go/testing/service"
 )
 
 // POST /admin/login

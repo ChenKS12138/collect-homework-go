@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"collect-homework-go/auth"
+	"github.com/ChenKS12138/collect-homework-go/auth"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -16,7 +16,7 @@ var ConfigFile string
 
 // RootCmd root commmand
 var RootCmd = &cobra.Command{
-	Use: "collect-homework-go",
+	Use: "github.com/ChenKS12138/collect-homework-go",
 }
 
 func init(){

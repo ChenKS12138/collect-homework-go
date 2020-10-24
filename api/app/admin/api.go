@@ -6,12 +6,12 @@ import (
 	"path/filepath"
 	"time"
 
-	"collect-homework-go/auth"
-	"collect-homework-go/database"
-	"collect-homework-go/email"
-	"collect-homework-go/model"
-	"collect-homework-go/template"
-	"collect-homework-go/util"
+	"github.com/ChenKS12138/collect-homework-go/auth"
+	"github.com/ChenKS12138/collect-homework-go/database"
+	"github.com/ChenKS12138/collect-homework-go/email"
+	"github.com/ChenKS12138/collect-homework-go/model"
+	"github.com/ChenKS12138/collect-homework-go/template"
+	"github.com/ChenKS12138/collect-homework-go/util"
 
 	"github.com/coreos/etcd/pkg/fileutil"
 	"github.com/go-chi/chi"

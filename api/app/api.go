@@ -3,9 +3,9 @@ package app
 import (
 	"net/http"
 
-	"collect-homework-go/api/app/admin"
-	"collect-homework-go/api/app/project"
-	"collect-homework-go/api/app/storage"
+	"github.com/ChenKS12138/collect-homework-go/api/app/admin"
+	"github.com/ChenKS12138/collect-homework-go/api/app/project"
+	"github.com/ChenKS12138/collect-homework-go/api/app/storage"
 
 	"github.com/go-chi/chi"
 )

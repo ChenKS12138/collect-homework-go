@@ -1,8 +1,8 @@
 package api_test
 
 import (
-	"collect-homework-go/testing/service"
-	"collect-homework-go/util"
+	"github.com/ChenKS12138/collect-homework-go/testing/service"
+	"github.com/ChenKS12138/collect-homework-go/util"
 	"errors"
 	"testing"
 )

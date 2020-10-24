@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"collect-homework-go/database/migrate"
+	"github.com/ChenKS12138/collect-homework-go/database/migrate"
 
 	"github.com/spf13/cobra"
 )

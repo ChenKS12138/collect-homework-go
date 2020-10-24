@@ -1,11 +1,11 @@
 package api_test
 
 import (
-	"collect-homework-go/api"
-	"collect-homework-go/auth"
-	"collect-homework-go/database/migrate"
-	"collect-homework-go/testing/service"
-	"collect-homework-go/util"
+	"github.com/ChenKS12138/collect-homework-go/api"
+	"github.com/ChenKS12138/collect-homework-go/auth"
+	"github.com/ChenKS12138/collect-homework-go/database/migrate"
+	"github.com/ChenKS12138/collect-homework-go/testing/service"
+	"github.com/ChenKS12138/collect-homework-go/util"
 	"errors"
 	"fmt"
 	"io/ioutil"

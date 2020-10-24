@@ -1,4 +1,4 @@
-module collect-homework-go
+module github.com/ChenKS12138/collect-homework-go
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20180720115003-f9ffefc3facf // indirect

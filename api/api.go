@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"time"
 
-	"collect-homework-go/api/app"
-	"collect-homework-go/database"
-	"collect-homework-go/util"
+	"github.com/ChenKS12138/collect-homework-go/api/app"
+	"github.com/ChenKS12138/collect-homework-go/database"
+	"github.com/ChenKS12138/collect-homework-go/util"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"

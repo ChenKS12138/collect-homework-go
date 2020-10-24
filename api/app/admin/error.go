@@ -1,7 +1,7 @@
 package admin
 
 import (
-	"collect-homework-go/util"
+	"github.com/ChenKS12138/collect-homework-go/util"
 	"net/http"
 )
 

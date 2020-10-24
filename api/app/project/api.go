@@ -1,10 +1,10 @@
 package project
 
 import (
-	"collect-homework-go/auth"
-	"collect-homework-go/database"
-	"collect-homework-go/model"
-	"collect-homework-go/util"
+	"github.com/ChenKS12138/collect-homework-go/auth"
+	"github.com/ChenKS12138/collect-homework-go/database"
+	"github.com/ChenKS12138/collect-homework-go/model"
+	"github.com/ChenKS12138/collect-homework-go/util"
 	"net/http"
 
 	"github.com/go-chi/chi"

@@ -1,6 +1,6 @@
 package main
 
-import "collect-homework-go/cmd"
+import "github.com/ChenKS12138/collect-homework-go/cmd"
 
 
 func main(){

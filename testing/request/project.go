@@ -1,7 +1,7 @@
 package request
 
 import (
-	"collect-homework-go/model"
+	"github.com/ChenKS12138/collect-homework-go/model"
 	"net/http"
 )
 

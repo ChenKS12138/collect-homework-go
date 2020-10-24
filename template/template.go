@@ -2,7 +2,7 @@ package template
 
 import (
 	"bytes"
-	mailTemplate "collect-homework-go/template/mail"
+	mailTemplate "github.com/ChenKS12138/collect-homework-go/template/mail"
 	"html/template"
 	"time"
 )

@@ -1,8 +1,8 @@
 package service
 
 import (
-	"collect-homework-go/database"
-	"collect-homework-go/testing/request"
+	"github.com/ChenKS12138/collect-homework-go/database"
+	"github.com/ChenKS12138/collect-homework-go/testing/request"
 	"errors"
 	"log"
 )

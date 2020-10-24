@@ -1,7 +1,7 @@
 package database
 
 import (
-	"collect-homework-go/model"
+	"github.com/ChenKS12138/collect-homework-go/model"
 
 	"github.com/go-pg/pg/v10"
 )

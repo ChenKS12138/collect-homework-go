@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"collect-homework-go/database"
+	"github.com/ChenKS12138/collect-homework-go/database"
 
 	"github.com/go-pg/migrations/v8"
 )

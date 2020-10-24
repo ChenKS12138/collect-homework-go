@@ -1,10 +1,10 @@
 package api_test
 
 import (
-	"collect-homework-go/api/app/storage"
-	fileBytes "collect-homework-go/testing/bytes"
-	"collect-homework-go/testing/service"
-	"collect-homework-go/util"
+	"github.com/ChenKS12138/collect-homework-go/api/app/storage"
+	fileBytes "github.com/ChenKS12138/collect-homework-go/testing/bytes"
+	"github.com/ChenKS12138/collect-homework-go/testing/service"
+	"github.com/ChenKS12138/collect-homework-go/util"
 	"errors"
 	"strings"
 	"testing"
