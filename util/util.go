@@ -10,6 +10,13 @@ import (
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
+var (
+    // Version  version
+    Version = "No Version Id"
+    // BuildTime build time
+    BuildTime = "No Build Time"
+);
+
 // RandString random string
 func RandString(n int) string {
     b := make([]byte, n)

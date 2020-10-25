@@ -1,8 +1,9 @@
 package project
 
 import (
-	"github.com/ChenKS12138/collect-homework-go/util"
 	"net/http"
+
+	"github.com/ChenKS12138/collect-homework-go/util"
 )
 
 var (
@@ -11,11 +12,13 @@ var (
 		HTTPStatusCode: http.StatusOK,
 		StatusText: "Project Error",
 		ErrorText: "Project Permission Denied",
+		Version: util.Version,
 	}
 	// ErrProjectNotFound project not found
 	ErrProjectNotFound = &util.ErrResponse{
 		HTTPStatusCode: http.StatusOK,
 		StatusText: "Project Error",
 		ErrorText: "Project Not Found",
+		Version: util.Version,
 	}
 )

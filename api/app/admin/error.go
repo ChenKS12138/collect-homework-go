@@ -1,8 +1,9 @@
 package admin
 
 import (
-	"github.com/ChenKS12138/collect-homework-go/util"
 	"net/http"
+
+	"github.com/ChenKS12138/collect-homework-go/util"
 )
 
 var (
@@ -11,6 +12,7 @@ var (
 		HTTPStatusCode: http.StatusOK,
 		StatusText: "Authorization Fall",
 		ErrorText: "Invalid Email or Password",
+		Version: util.Version,
 	}
 
 	// ErrInvitationCodeFrequently error invitation code too frequently
@@ -18,6 +20,7 @@ var (
 		HTTPStatusCode: http.StatusOK,
 		StatusText: "Invation Code Fail",
 		ErrorText: "Request Invitation Code Too Frequently",
+		Version: util.Version,
 	}
 
 	// ErrInvitationCodeWrong error invation code 
@@ -25,11 +28,13 @@ var (
 		HTTPStatusCode: http.StatusOK,
 		StatusText: "Invation Code Fail",
 		ErrorText: "Invitation Code Wrong",
+		Version: util.Version,
 	}
 	// ErrEmailUsed error email used
 	ErrEmailUsed = &util.ErrResponse{
 		HTTPStatusCode: http.StatusOK,
 		StatusText: "Register Fail",
 		ErrorText: "Email Used",
+		Version: util.Version,
 	}
 )

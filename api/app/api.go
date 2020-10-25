@@ -6,6 +6,7 @@ import (
 	"github.com/ChenKS12138/collect-homework-go/api/app/admin"
 	"github.com/ChenKS12138/collect-homework-go/api/app/project"
 	"github.com/ChenKS12138/collect-homework-go/api/app/storage"
+	"github.com/ChenKS12138/collect-homework-go/util"
 
 	"github.com/go-chi/chi"
 )
@@ -28,6 +29,6 @@ func Router() (*chi.Mux,error) {
 
 
 func welcome(w http.ResponseWriter,r *http.Request){
-	text := "Welcome!\nRequest From "+r.RemoteAddr
+	text := "Welcome!\nRequest From "+r.RemoteAddr+"\nVersion: "+util.Version
 	w.Write([]byte(text))
 }

@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/ChenKS12138/collect-homework-go/util"
 	"github.com/spf13/viper"
 )
 
@@ -31,6 +32,8 @@ func NewServer() (*Server, error) {
 
 // Start start
 func (srv *Server) Start() {
+	log.Println("Version: ",util.Version)
+	log.Println("BuildTime: ",util.BuildTime)
 	log.Println("Start Server...");
 	go func(){
 		if err := srv.ListenAndServe(); err != http.ErrServerClosed {

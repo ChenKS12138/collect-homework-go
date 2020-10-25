@@ -1,10 +1,12 @@
 package cmd
 
 import (
-	"github.com/ChenKS12138/collect-homework-go/auth"
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/ChenKS12138/collect-homework-go/auth"
+	"github.com/ChenKS12138/collect-homework-go/util"
 
 	"github.com/go-chi/jwtauth"
 	"github.com/spf13/cobra"
@@ -17,6 +19,8 @@ var ConfigFile string
 // RootCmd root commmand
 var RootCmd = &cobra.Command{
 	Use: "github.com/ChenKS12138/collect-homework-go",
+	Short: "Collect HomeWork Backend Build Time "+util.BuildTime,
+	Version: util.Version,
 }
 
 func init(){

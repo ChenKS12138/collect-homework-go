@@ -12,6 +12,7 @@ type DataResponse struct {
 	Data interface{} `json:"data"`
 	Success bool `json:"success"`           // user-level status message
 	StatusText string `json:"status"`
+	Version string `json:"version"`
 }
 
 // NewDataResponse new data response
@@ -20,6 +21,7 @@ func NewDataResponse(d interface{}) (*DataResponse){
 		Success: true,
 		Data: d,
 		StatusText: "ok",
+		Version: Version,
 	}
 }
 
@@ -33,6 +35,7 @@ type ErrResponse struct {
 	AppCode          int64             `json:"code,omitempty"`   // application-specific error code
 	ErrorText        string            `json:"error,omitempty"`  // application-level error message, for debugging
 	ValidationErrors validation.Errors `json:"errors,omitempty"` // user level model validation errors
+	Version string `json:"version"`
 }
 
 // Render sets the application-specific error code in AppCode.
@@ -50,6 +53,7 @@ func ErrInvalidRequest(err error) render.Renderer {
 		StatusText:     http.StatusText(http.StatusUnprocessableEntity),
 		ErrorText:      err.Error(),
 		Success: false,
+		Version: Version,
 	}
 }
 
@@ -61,6 +65,7 @@ func ErrRender(err error) render.Renderer {
 		StatusText:     "Error rendering response.",
 		ErrorText:      err.Error(),
 		Success: false,
+		Version: Version,
 	}
 }
 
@@ -73,16 +78,17 @@ func ErrValidation( err error) render.Renderer {
 		ErrorText:        err.Error(),
 		// ValidationErrors: valErr,
 		Success: false,
+		Version: Version,
 	}
 }
 
 var (
 	// ErrBadRequest return status 400 Bad Request for malformed request body.
-	ErrBadRequest = &ErrResponse{HTTPStatusCode: http.StatusBadRequest, StatusText: http.StatusText(http.StatusBadRequest)}
+	ErrBadRequest = &ErrResponse{HTTPStatusCode: http.StatusBadRequest, StatusText: http.StatusText(http.StatusBadRequest),Version: Version}
 
 	// ErrNotFound returns status 404 Not Found for invalid resource request.
-	ErrNotFound = &ErrResponse{HTTPStatusCode: http.StatusNotFound, StatusText: http.StatusText(http.StatusNotFound)}
+	ErrNotFound = &ErrResponse{HTTPStatusCode: http.StatusNotFound, StatusText: http.StatusText(http.StatusNotFound),Version:Version}
 
 	// ErrInternalServerError returns status 500 Internal Server Error.
-	ErrInternalServerError = &ErrResponse{HTTPStatusCode: http.StatusInternalServerError, StatusText: http.StatusText(http.StatusInternalServerError)}
+	ErrInternalServerError = &ErrResponse{HTTPStatusCode: http.StatusInternalServerError, StatusText: http.StatusText(http.StatusInternalServerError),Version: Version}
 )
