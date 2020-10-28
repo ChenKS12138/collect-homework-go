@@ -1,13 +1,15 @@
 package api_test
 
 import (
+	"errors"
+	"log"
+	"strings"
+	"testing"
+
 	"github.com/ChenKS12138/collect-homework-go/api/app/storage"
 	fileBytes "github.com/ChenKS12138/collect-homework-go/testing/bytes"
 	"github.com/ChenKS12138/collect-homework-go/testing/service"
 	"github.com/ChenKS12138/collect-homework-go/util"
-	"errors"
-	"strings"
-	"testing"
 
 	"github.com/chenhg5/collection"
 )
@@ -276,5 +278,61 @@ func TestStorageDownload(t *testing.T){
 	ok,err := service.StorageDownload(Ts.URL,commonUserToken2,projectID)
 	if ok || ! strings.Contains(err.Error(),"Not Bytes Stream") {
 		t.Fatal("Storage Download Fail")
+	}
+}
+
+func TestStorageProjectSize(t *testing.T){
+	projectNames := []string{ "B11111111-陈陈陈-实验1.doc", "B11111112-陈陈-实验1.doc"}
+	_,superUserToken,err := service.AdminLogin(Ts.URL,SuperAdmin.Email,SuperAdmin.Password)
+	if err != nil {
+		t.Fatal(err)
+	}
+	commonUserToken1 ,err := generateAdmin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	commonUserToken2,err := generateAdmin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	_,err = service.ProjectInsert(Ts.URL,commonUserToken1,"test_storage_upload_wrong_secret_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_,projects,err := service.ProjectOwn(Ts.URL,commonUserToken1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(*projects) != 1 {
+		t.Fatal(errors.New("Project Insert Abnormal"))
+	}
+	projectID := (*projects)[0].ID
+	_,err = service.StorageUplaod(Ts.URL,util.RandString(6),projectID,projectNames[0],fileBytes.Docx)
+	if err != nil{
+		t.Fatal(err)
+	}
+	_,err = service.StorageUplaod(Ts.URL,util.RandString(6),projectID,projectNames[1],fileBytes.Docx)
+	if err != nil{
+		t.Fatal(err)
+	}
+
+	// common user
+	_,size,err := service.StorageProjectSize(Ts.URL,commonUserToken1,projectID)
+	if err!=nil || size ==0 {
+		log.Println(err,size);
+		t.Fatal(errors.New("Test Storage Project Size Fail (Common User)"))
+	}
+
+	// super user
+	_,size,err = service.StorageProjectSize(Ts.URL,superUserToken,projectID)
+	if err != nil || size == 0 {
+		log.Println(err,size)
+		t.Fatal(errors.New("Test Storage Project Size Fail (Super User)"))
+	}
+
+	// common user2
+	ok,_,err := service.StorageProjectSize(Ts.URL,commonUserToken2,projectID)
+	if ok || !strings.Contains(err.Error(),storage.ErrProjectPremissionDenied.ErrorText) {
+		t.Fatal(errors.New("Test Storage File List Fail (Super User2)"))
 	}
 }

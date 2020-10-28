@@ -16,6 +16,7 @@ migrate:
 migrate-init:
 	@$(CC) run main.go migrate --init --config-file=.env
 
+test:export DB_DEBUG=false
 test:export EMAIL_PREVENT=true
 test:export STORAGE_PATH_PREFIX=../tmp
 test:

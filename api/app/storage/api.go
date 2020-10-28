@@ -1,12 +1,6 @@
 package storage
 
 import (
-	"github.com/ChenKS12138/collect-homework-go/auth"
-	"github.com/ChenKS12138/collect-homework-go/database"
-	"github.com/ChenKS12138/collect-homework-go/email"
-	"github.com/ChenKS12138/collect-homework-go/model"
-	"github.com/ChenKS12138/collect-homework-go/template"
-	"github.com/ChenKS12138/collect-homework-go/util"
 	"crypto/md5"
 	"encoding/hex"
 	"io/ioutil"
@@ -16,6 +10,13 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/ChenKS12138/collect-homework-go/auth"
+	"github.com/ChenKS12138/collect-homework-go/database"
+	"github.com/ChenKS12138/collect-homework-go/email"
+	"github.com/ChenKS12138/collect-homework-go/model"
+	"github.com/ChenKS12138/collect-homework-go/template"
+	"github.com/ChenKS12138/collect-homework-go/util"
 
 	"github.com/chenhg5/collection"
 	"github.com/coreos/etcd/pkg/fileutil"
@@ -44,6 +45,7 @@ func Router()(*chi.Mux,error){
 		c.Use(jwtauth.Authenticator)
 		c.Get("/download",download)
 		c.Get("/fileList",fileList)
+		c.Get("/projectSize",projectSize)
 	})
 
 	// public router
@@ -298,5 +300,45 @@ func fileList(w http.ResponseWriter,r *http.Request){
 		Files []string `json:"files"`
 	}{
 		Files: filelist,
+	}))
+}
+
+func projectSize(w http.ResponseWriter,r *http.Request){
+	claim,err := auth.GenerateClaim(r);
+	if err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+	values := r.URL.Query()
+	projectSizeDto := &ProjectSizeDto{
+		ID: values.Get("id"),
+	}
+	if err := projectSizeDto.validate();err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+
+	project,err := database.Store.Project.SelectByID(projectSizeDto.ID)
+	if err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+	if !claim.IsSuperAdmin && project.AdminID != claim.ID {
+		render.Render(w,r,ErrProjectPremissionDenied)
+		return
+	}
+
+	storagePathPrefix := viper.GetString("STORAGE_PATH_PREFIX")
+	dirPath := filepath.Join(storagePathPrefix,project.ID)
+	fileutil.TouchDirAll(dirPath)
+	size,err := util.DirSizeB(dirPath)
+	if err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+	render.JSON(w,r,util.NewDataResponse(&struct{
+		Size int64 `json:"size"`
+	} {
+		Size:size,
 	}))
 }

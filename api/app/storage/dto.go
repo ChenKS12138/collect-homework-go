@@ -60,3 +60,15 @@ func (f *FileListDto)validate()error {
 	}
 	return err.Filter()
 }
+
+// ProjectSizeDto project size dto
+type ProjectSizeDto struct {
+	ID string `json:"id"`
+}
+
+func (p * ProjectSizeDto)validate() error {
+	err := &validation.Errors{
+		"id":validation.Validate(p.ID,validation.Required,is.UUIDv4),
+	}
+	return err.Filter()
+}

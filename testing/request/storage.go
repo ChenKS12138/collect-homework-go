@@ -106,3 +106,24 @@ func StorageDownload(url string,token string,projectID string) (bool,error) {
 	}
 	return true,nil
 }
+
+// StorageProjectSize project size 
+func StorageProjectSize(url string,token string,projectID string)(*struct {
+	BasicResponse
+	Data struct {
+		Size int64 `json:"size"`
+	} `json:"data"`
+},error){
+	response := &struct {
+		BasicResponse
+		Data struct {
+			Size int64 `json:"size"`
+		} `json:"data"`
+	}{}
+	header := &http.Header{}
+	header.Set("Authorization","Bearer "+token)
+	err := GetRequest(url,header,map[string]string {
+		"id":projectID,
+	},response)
+	return response,err
+}
