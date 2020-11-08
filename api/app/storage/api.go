@@ -27,7 +27,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const maxFileSize = 50 * 1000 *1000
+const maxFileSize = 100 * 1000 *1000
 const textDot = "."
 
 const (
