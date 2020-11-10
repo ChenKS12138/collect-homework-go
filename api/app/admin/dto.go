@@ -48,3 +48,15 @@ func (r *RegisterDto)validate() error {
 	}
 	return err.Filter()
 }
+
+// SignDto sign dto
+type SignDto struct {
+	Expire int `json:"expire"` // unit time.Minute
+}
+
+func (s *SignDto)validate() error {
+	err := &validation.Errors{
+		"expire":validation.Validate(s.Expire,validation.Min(1),validation.Required),
+	}
+	return err.Filter()
+}

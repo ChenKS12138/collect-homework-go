@@ -43,8 +43,14 @@ func Router()(*chi.Mux,error){
 	r.Group(func(c chi.Router){
 		c.Use(jwtauth.Verifier(auth.TokenAuth))
 		c.Use(jwtauth.Authenticator)
+		
+		// require auth.CodeFileR + auth.CodeFileX
 		c.Get("/download",download)
+
+		// require auth.CodeFileR
 		c.Get("/fileList",fileList)
+
+		// rquire auth.CodeProjectR
 		c.Get("/projectSize",projectSize)
 	})
 
@@ -189,6 +195,10 @@ func download(w http.ResponseWriter,r *http.Request){
 		render.Render(w,r,util.ErrRender(err))
 		return
 	}
+	if !auth.VerifyAuthCode(claim.AuthCode,auth.CodeFileR+auth.CodeFileX) {
+		render.Render(w,r,util.ErrUnauthorized)
+		return
+	}
 	values:= r.URL.Query()
 	downloadDto := &DownloadDto{
 		ID: values.Get("id"),
@@ -256,6 +266,10 @@ func fileList(w http.ResponseWriter,r *http.Request){
 		render.Render(w,r,util.ErrRender(err))
 		return
 	}
+	if !auth.VerifyAuthCode(claim.AuthCode,auth.CodeFileR) {
+		render.Render(w,r,util.ErrUnauthorized)
+		return
+	}
 	values := r.URL.Query()
 	fileListDto := &FileListDto{
 		ID: values.Get("id"),
@@ -307,6 +321,10 @@ func projectSize(w http.ResponseWriter,r *http.Request){
 	claim,err := auth.GenerateClaim(r);
 	if err != nil {
 		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+	if !auth.VerifyAuthCode(claim.AuthCode,auth.CodeProjectR){
+		render.Render(w,r,util.ErrUnauthorized)
 		return
 	}
 	values := r.URL.Query()

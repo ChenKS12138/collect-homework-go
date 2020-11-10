@@ -30,7 +30,9 @@ func Router()(*chi.Mux ,error){
 		c.Use(jwtauth.Verifier(auth.TokenAuth))
 		c.Use(jwtauth.Authenticator)
 		
+		// rquire auth.CodeAdminR + auth.CodeProjectR + auth.CodeFileR
 		c.Get("/status",status)
+		c.Post("/sign",sign)
 	})
 
 	// public router
@@ -60,14 +62,27 @@ func login(w http.ResponseWriter,r *http.Request) {
 		render.Render(w,r,util.ErrRender(err))
 		return
 	}
+
+	//full auth
+	authCode := auth.CodeFileX +
+							auth.CodeFileW +
+							auth.CodeFileR + 
+							auth.CodeProjectX +
+							auth.CodeProjectW +
+							auth.CodeProjectR +
+							auth.CodeAdminX +
+							auth.CodeAdminW +
+							auth.CodeAdminR
 		
 	claim := &auth.Claim{
 		IsSuperAdmin: admin.IsSuperAdmin,
 		Email: admin.Email,
 		ID: admin.ID,
 		Name: admin.Name,
+		AuthCode: authCode,
 	}
-	render.JSON(w,r,util.NewDataResponse(claim.ToJwtClaim()))
+
+	render.JSON(w,r,util.NewDataResponse(claim.ToJwtClaim(time.Hour*4)))
 }
 
 // invitation code
@@ -168,6 +183,10 @@ func status(w http.ResponseWriter, r *http.Request) {
 		render.Render(w,r,util.ErrRender(err))
 		return
 	}
+	if !auth.VerifyAuthCode(claim.AuthCode,auth.CodeAdminR+auth.CodeProjectR+auth.CodeFileR) {
+		render.Render(w,r,util.ErrUnauthorized)
+		return
+	}
 
 	fileCount,err := database.Store.Submission.SelectCountByAdminID(claim.ID)
 	if err != nil {
@@ -211,3 +230,27 @@ func status(w http.ResponseWriter, r *http.Request) {
 	}))
 }
 
+//sign
+func sign(w http.ResponseWriter,r *http.Request){
+	// claim,err := auth.GenerateClaim(r)
+	// if err != nil {
+	// 	render.Render(w,r,util.ErrRender(err))
+	// 	return
+	// }
+	// values:=r.URL.Query()
+	// expire,_ := strconv.Atoi(values.Get("expire"));
+	// signDto := &SignDto{
+	// 	Expire: expire,
+	// }
+	// if err:= signDto.validate(); err != nil {
+	// 	render.Render(w,r,util.ErrRender(err))
+	// 	return
+	// }
+	
+	// authCode := auth.CodeProjectFile + 
+	// 	auth.CodeProjectRead +
+	// 	auth.CodeProjectExcuse
+	// claim.AuthCode = authCode
+
+	// render.JSON(w,r,util.NewDataResponse(claim.ToJwtClaim((time.Minute*10))));
+}

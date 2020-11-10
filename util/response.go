@@ -91,4 +91,6 @@ var (
 
 	// ErrInternalServerError returns status 500 Internal Server Error.
 	ErrInternalServerError = &ErrResponse{HTTPStatusCode: http.StatusInternalServerError, StatusText: http.StatusText(http.StatusInternalServerError),Version: Version}
+	// ErrUnauthorized returns status 401 Unauthorized
+	ErrUnauthorized = &ErrResponse{HTTPStatusCode: http.StatusUnauthorized, StatusText: http.StatusText(http.StatusUnauthorized),Version:Version}
 )

@@ -1,11 +1,12 @@
 package project
 
 import (
+	"net/http"
+
 	"github.com/ChenKS12138/collect-homework-go/auth"
 	"github.com/ChenKS12138/collect-homework-go/database"
 	"github.com/ChenKS12138/collect-homework-go/model"
 	"github.com/ChenKS12138/collect-homework-go/util"
-	"net/http"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/jwtauth"
@@ -21,11 +22,19 @@ func Router()(*chi.Mux,error){
 		c.Use(jwtauth.Verifier(auth.TokenAuth))
 		c.Use(jwtauth.Authenticator)
 		
+		// require auth.CodeProjectR
 		c.Get("/own",own)
+		
+		// require auth.CodeProjectW
 		c.Post("/insert",insert)
+		// require auth.CodeProjectW + auth.CodeProjectR
 		c.Post("/update",update)
+		
 		// 不使用真正的delete
+		// require auth.CodeProjectW + auth.CodeProjectX
 		c.Post("/delete",delete)
+
+		// require auth.CodeProjectW + auth.CodeProjectX
 		c.Post("/restore",restore)
 	})
 
@@ -41,6 +50,10 @@ func own(w http.ResponseWriter,r *http.Request){
 	claim,err := auth.GenerateClaim(r)
 	if err != nil {
 		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+	if !auth.VerifyAuthCode(claim.AuthCode,auth.CodeProjectR){
+		render.Render(w,r,util.ErrUnauthorized)
 		return
 	}
 	projects := &[]model.ProjectWithAdminName{}
@@ -68,6 +81,11 @@ func insert(w http.ResponseWriter,r *http.Request){
 	claim,err := auth.GenerateClaim(r)
 	if err != nil {
 		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+
+	if !auth.VerifyAuthCode(claim.AuthCode,auth.CodeProjectW) {
+		render.Render(w,r,util.ErrUnauthorized)
 		return
 	}
 
@@ -99,6 +117,11 @@ func update(w http.ResponseWriter,r *http.Request){
 	claim,err := auth.GenerateClaim(r)
 	if err != nil {
 		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+
+	if !auth.VerifyAuthCode(claim.AuthCode,auth.CodeProjectW+auth.CodeProjectR) {
+		render.Render(w,r,util.ErrUnauthorized)
 		return
 	}
 
@@ -147,6 +170,10 @@ func delete(w http.ResponseWriter,r *http.Request){
 		render.Render(w,r,util.ErrRender(err))
 		return
 	}
+	if !auth.VerifyAuthCode(claim.AuthCode,auth.CodeProjectW+auth.CodeProjectX) {
+		render.Render(w,r,util.ErrUnauthorized)
+		return
+	}
 	deleteDto := &DeleteDto{}
 	render.DecodeJSON(r.Body,deleteDto)
 	if err = deleteDto.validate();err != nil {
@@ -179,6 +206,10 @@ func restore(w http.ResponseWriter,r *http.Request){
 	claim,err := auth.GenerateClaim(r)
 	if err != nil {
 		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+	if !auth.VerifyAuthCode(claim.AuthCode,auth.CodeProjectW+auth.CodeProjectX) {
+		render.Render(w,r,util.ErrUnauthorized)
 		return
 	}
 	restoreDto := &RestoreDto{}
