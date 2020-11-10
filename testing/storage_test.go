@@ -15,7 +15,7 @@ import (
 )
 
 // POST /storage/upload
-func TestStorageUplaod(t *testing.T){
+func TestStorageUpload(t *testing.T){
 	token,err := generateAdmin()
 	if err != nil {
 		t.Fatal(err)
@@ -32,7 +32,7 @@ func TestStorageUplaod(t *testing.T){
 		t.Fatal("Project Insert Abnormal")
 	}
 	projectID := (*projects)[0].ID
-	_,err = service.StorageUplaod(Ts.URL,util.RandString(6),projectID,"B11111111-陈陈陈-实验1.doc",fileBytes.Docx)
+	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,"B11111111-陈陈陈-实验1.doc",fileBytes.Docx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -55,7 +55,7 @@ func TestStorageUploadWrongExtensions(t *testing.T){
 		t.Fatal(errors.New("Project Insert Abnormal"))
 	}
 	projectID := (*projects)[0].ID
-	ok,err := service.StorageUplaod(Ts.URL,util.RandString(6),projectID,"B11111111-陈陈陈-实验1.doc",fileBytes.Docx)
+	ok,err := service.StorageUpload(Ts.URL,util.RandString(6),projectID,"B11111111-陈陈陈-实验1.doc",fileBytes.Docx)
 	if ok || ! strings.Contains(err.Error(),storage.ErrFileNameExtensions.ErrorText){
 		t.Fatal(errors.New("Test Storage Upload Wrong Wrong Extensions Fail"))
 	}
@@ -78,7 +78,7 @@ func TestStorageUploadWrongFileName(t *testing.T){
 		t.Fatal(errors.New("Project Insert Abnormal"))
 	}
 	projectID := (*projects)[0].ID
-	ok,err := service.StorageUplaod(Ts.URL,util.RandString(6),projectID,"B11111111.doc",fileBytes.Docx)
+	ok,err := service.StorageUpload(Ts.URL,util.RandString(6),projectID,"B11111111.doc",fileBytes.Docx)
 	if ok || ! strings.Contains(err.Error(),storage.ErrFileNamePattern.ErrorText){
 		t.Fatal(errors.New("Test Storage Upload Wrong Extensions Fail"))
 	}
@@ -103,16 +103,16 @@ func TestStorageUploadWrongSecret(t *testing.T){
 	projectID := (*projects)[0].ID
 	fileName := "B11111111-陈陈陈-实验1.doc"
 	secret := util.RandString(6)
-	_,err = service.StorageUplaod(Ts.URL,secret,projectID,fileName,fileBytes.Docx)
+	_,err = service.StorageUpload(Ts.URL,secret,projectID,fileName,fileBytes.Docx)
 	if err != nil{
 		t.Fatal(err)
 	}
 	
-	ok,err := service.StorageUplaod(Ts.URL,secret+"_wrong_suffix",projectID,fileName,fileBytes.Docx)
+	ok,err := service.StorageUpload(Ts.URL,secret+"_wrong_suffix",projectID,fileName,fileBytes.Docx)
 	if ok || ! strings.Contains(err.Error(),storage.ErrFileSecret.ErrorText){
 		t.Fatal("Test Storage Upload Fail (Expect ErrFileSecret)")
 	}
-	_,err = service.StorageUplaod(Ts.URL,secret,projectID,fileName,fileBytes.Docx)
+	_,err = service.StorageUpload(Ts.URL,secret,projectID,fileName,fileBytes.Docx)
 	if err != nil{
 		t.Fatal(err)
 		t.Fatal("Test Storage Upload Fail (Expect Overwriting Success)")
@@ -141,11 +141,11 @@ func TestStorageFileCount(t *testing.T){
 		t.Fatal(errors.New("Project Insert Abnormal"))
 	}
 	projectID := (*projects)[0].ID
-	_,err = service.StorageUplaod(Ts.URL,util.RandString(6),projectID,"B11111111-陈陈陈-实验1.doc",fileBytes.Docx)
+	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,"B11111111-陈陈陈-实验1.doc",fileBytes.Docx)
 	if err != nil{
 		t.Fatal(err)
 	}
-	_,err = service.StorageUplaod(Ts.URL,util.RandString(6),projectID,"B11111112-陈陈-实验1.doc",fileBytes.Docx)
+	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,"B11111112-陈陈-实验1.doc",fileBytes.Docx)
 	if err != nil{
 		t.Fatal(err)
 	}
@@ -195,11 +195,11 @@ func TestStorageFileList(t *testing.T){
 		t.Fatal(errors.New("Project Insert Abnormal"))
 	}
 	projectID := (*projects)[0].ID
-	_,err = service.StorageUplaod(Ts.URL,util.RandString(6),projectID,projectNames[0],fileBytes.Docx)
+	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,projectNames[0],fileBytes.Docx)
 	if err != nil{
 		t.Fatal(err)
 	}
-	_,err = service.StorageUplaod(Ts.URL,util.RandString(6),projectID,projectNames[1],fileBytes.Docx)
+	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,projectNames[1],fileBytes.Docx)
 	if err != nil{
 		t.Fatal(err)
 	}
@@ -256,11 +256,11 @@ func TestStorageDownload(t *testing.T){
 		t.Fatal(errors.New("Project Insert Abnormal"))
 	}
 	projectID := (*projects)[0].ID
-	_,err = service.StorageUplaod(Ts.URL,util.RandString(6),projectID,projectNames[0],fileBytes.Docx)
+	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,projectNames[0],fileBytes.Docx)
 	if err != nil{
 		t.Fatal(err)
 	}
-	_,err = service.StorageUplaod(Ts.URL,util.RandString(6),projectID,projectNames[1],fileBytes.Docx)
+	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,projectNames[1],fileBytes.Docx)
 	if err != nil{
 		t.Fatal(err)
 	}
@@ -307,11 +307,11 @@ func TestStorageProjectSize(t *testing.T){
 		t.Fatal(errors.New("Project Insert Abnormal"))
 	}
 	projectID := (*projects)[0].ID
-	_,err = service.StorageUplaod(Ts.URL,util.RandString(6),projectID,projectNames[0],fileBytes.Docx)
+	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,projectNames[0],fileBytes.Docx)
 	if err != nil{
 		t.Fatal(err)
 	}
-	_,err = service.StorageUplaod(Ts.URL,util.RandString(6),projectID,projectNames[1],fileBytes.Docx)
+	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,projectNames[1],fileBytes.Docx)
 	if err != nil{
 		t.Fatal(err)
 	}

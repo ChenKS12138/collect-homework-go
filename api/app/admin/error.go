@@ -37,4 +37,11 @@ var (
 		ErrorText: "Email Used",
 		Version: util.Version,
 	}
+	// ErrInsufficientAuthority error insufficient authority
+	ErrInsufficientAuthority=&util.ErrResponse{
+		HTTPStatusCode: http.StatusOK,
+		StatusText: "Insufficient Authority",
+		ErrorText: "Insufficient Authority",
+		Version: util.Version,
+	}
 )

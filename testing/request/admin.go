@@ -84,3 +84,26 @@ func AdminStatus(url string,token string) ( *struct{
 	}
 	return &response.Data,nil
 }
+
+// AdminSubToken admin subToken
+func AdminSubToken(url string,token string,subTokenDto *struct{
+	Expire int64 `json:"expire"`
+	AuthCode uint32 `json:"authCode"`
+}) (
+	*struct {
+		BasicResponse
+		Data string `json:"data"`
+	},error) {
+	response := &struct {
+		BasicResponse
+		Data string `json:"data"`
+	}{}
+	header := &http.Header{}
+	header.Set("Authorization","Bearer "+token)
+	
+	err := PostRequest(url,header,subTokenDto,response);
+	if err != nil {
+		return nil,err;
+	}
+	return response,nil;
+}

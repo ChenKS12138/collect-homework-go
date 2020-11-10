@@ -2,12 +2,15 @@ package api_test
 
 import (
 	"errors"
+	"log"
 	"strings"
 	"testing"
 
 	"github.com/ChenKS12138/collect-homework-go/api/app/admin"
 	"github.com/ChenKS12138/collect-homework-go/database"
+	fileBytes "github.com/ChenKS12138/collect-homework-go/testing/bytes"
 	"github.com/ChenKS12138/collect-homework-go/testing/service"
+	"github.com/ChenKS12138/collect-homework-go/util"
 )
 
 // POST /admin/login
@@ -122,6 +125,47 @@ func TestAdminRegisterWrongCode(t *testing.T){
 }
 
 // GET /admin/status
-func TestAdminStatus(t * testing.T){
+func TestAdminStatus(t * testing.T){ }
+
+// POST /admin/subToken
+func TestAdminSubToken(t *testing.T){
+	ok,token,_ := service.AdminLogin(Ts.URL,SuperAdmin.Email,SuperAdmin.Password)
+	if !ok {
+		t.Fatal("Test Admin SubToken, SuperAdmin Login Fail")
+	}
+	_,err := service.ProjectInsert(Ts.URL,token,"test_storage_upload"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc","docx"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_,projects,err := service.ProjectOwn(Ts.URL,token)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(*projects) != 1 {
+		t.Fatal("Project Insert Abnormal")
+	}
+	projectID := (*projects)[0].ID
 	
+
+	ok,subToken := service.AdminSubToken(Ts.URL,token,10,5)
+	if !ok {
+		t.Fatal("Test Admin SubToken, Request SubToken Fail")
+	}
+
+	ok,_,err = service.ProjectOwn(Ts.URL,subToken)
+	if ok {
+		log.Println(err)
+		t.Fatal("Test Admin SubToken, Should Be Invalid")
+	}
+	projectNames := []string{ "B11111111-陈陈陈-实验1.doc", "B11111112-陈陈-实验1.doc"}
+
+	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,projectNames[1],fileBytes.Docx)
+	if err != nil{
+		t.Fatal(err)
+	}
+	_,err = service.StorageDownload(Ts.URL,subToken,projectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 }

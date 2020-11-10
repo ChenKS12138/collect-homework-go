@@ -1,6 +1,9 @@
 package admin
 
 import (
+	"fmt"
+
+	"github.com/ChenKS12138/collect-homework-go/auth"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
 )
@@ -49,14 +52,19 @@ func (r *RegisterDto)validate() error {
 	return err.Filter()
 }
 
-// SignDto sign dto
-type SignDto struct {
-	Expire int `json:"expire"` // unit time.Minute
+// SubTokenDto subToken dto
+type SubTokenDto struct {
+	Expire int64 `json:"expire"` // unit time.Minute
+	AuthCode auth.Code `json:"authCode"`
 }
 
-func (s *SignDto)validate() error {
+func (s *SubTokenDto)validate() error {
+	fmt.Println(s);
 	err := &validation.Errors{
 		"expire":validation.Validate(s.Expire,validation.Min(1),validation.Required),
+		"authCode":validation.Validate(s.AuthCode,validation.In(
+			auth.CodeFileR + auth.CodeFileX, // download by subToken
+		)),
 	}
 	return err.Filter()
 }

@@ -32,7 +32,8 @@ func Router()(*chi.Mux ,error){
 		
 		// rquire auth.CodeAdminR + auth.CodeProjectR + auth.CodeFileR
 		c.Get("/status",status)
-		c.Post("/sign",sign)
+		// require [x| Authoriry x higher than SubTokenDto.AuthCode] 
+		c.Post("/subToken",subToken)
 	})
 
 	// public router
@@ -230,27 +231,26 @@ func status(w http.ResponseWriter, r *http.Request) {
 	}))
 }
 
-//sign
-func sign(w http.ResponseWriter,r *http.Request){
-	// claim,err := auth.GenerateClaim(r)
-	// if err != nil {
-	// 	render.Render(w,r,util.ErrRender(err))
-	// 	return
-	// }
-	// values:=r.URL.Query()
-	// expire,_ := strconv.Atoi(values.Get("expire"));
-	// signDto := &SignDto{
-	// 	Expire: expire,
-	// }
-	// if err:= signDto.validate(); err != nil {
-	// 	render.Render(w,r,util.ErrRender(err))
-	// 	return
-	// }
-	
-	// authCode := auth.CodeProjectFile + 
-	// 	auth.CodeProjectRead +
-	// 	auth.CodeProjectExcuse
-	// claim.AuthCode = authCode
+//subToken
+func subToken(w http.ResponseWriter,r *http.Request){
+	claim,err := auth.GenerateClaim(r)
+	if err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+	subTokenDto := &SubTokenDto{};
+	render.DecodeJSON(r.Body,subTokenDto);
 
-	// render.JSON(w,r,util.NewDataResponse(claim.ToJwtClaim((time.Minute*10))));
+	if err:= subTokenDto.validate(); err != nil {
+		render.Render(w,r,util.ErrRender(err))
+		return
+	}
+
+	if !auth.VerifyAuthCode(claim.AuthCode,subTokenDto.AuthCode) {
+		render.Render(w,r,ErrInsufficientAuthority)
+		return
+	}
+	claim.AuthCode = subTokenDto.AuthCode;
+	
+	render.JSON(w,r,util.NewDataResponse(claim.ToJwtClaim((time.Duration(subTokenDto.Expire)*time.Minute))));
 }

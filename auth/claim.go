@@ -20,12 +20,14 @@ const (
 	CodeFileW Code=0b1 << 1
 	// CodeFileR file write
 	CodeFileR Code=0b1 << 2
+
 	// CodeProjectX file excuse
 	CodeProjectX Code=0b1 << 3
 	// CodeProjectW project excuse
 	CodeProjectW Code=0b1 << 4
 	// CodeProjectR project write
 	CodeProjectR Code=0b1 << 5
+	
 	// CodeAdminX admin excuse
 	CodeAdminX Code=0b1 << 6
 	// CodeAdminW admin read

@@ -1,10 +1,11 @@
 package service
 
 import (
-	"github.com/ChenKS12138/collect-homework-go/database"
-	"github.com/ChenKS12138/collect-homework-go/testing/request"
 	"errors"
 	"log"
+
+	"github.com/ChenKS12138/collect-homework-go/database"
+	"github.com/ChenKS12138/collect-homework-go/testing/request"
 )
 
 // AdminLogin admin login
@@ -100,4 +101,20 @@ func AdminStatus(baseURL string,token string) (bool,*struct{
 		return false,nil,err
 	}
 	return true,result,nil
+}
+
+// AdminSubToken admin subToken
+func AdminSubToken(baseURL string,token string,expire int64,authCode uint32) (bool,string) {
+	result,err := request.AdminSubToken(baseURL+"/admin/subToken",token,&struct{
+		Expire int64 `json:"expire"`
+		AuthCode uint32 `json:"authCode"`
+	}{
+		Expire: expire,
+		AuthCode: authCode,
+	})
+	if err != nil {
+		log.Println(err)
+		return false,""
+	}
+	return result.Success,result.Data
 }
