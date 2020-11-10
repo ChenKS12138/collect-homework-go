@@ -1,8 +1,6 @@
 package admin
 
 import (
-	"fmt"
-
 	"github.com/ChenKS12138/collect-homework-go/auth"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
@@ -59,7 +57,6 @@ type SubTokenDto struct {
 }
 
 func (s *SubTokenDto)validate() error {
-	fmt.Println(s);
 	err := &validation.Errors{
 		"expire":validation.Validate(s.Expire,validation.Min(1),validation.Required),
 		"authCode":validation.Validate(s.AuthCode,validation.In(

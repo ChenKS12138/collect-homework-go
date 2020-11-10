@@ -235,6 +235,7 @@ func download(w http.ResponseWriter,r *http.Request){
 		return
 	}
 	w.Header().Set("Content-Length",strconv.FormatInt(int64(len(zipBytes)),10))
+	w.Header().Set("Content-Disposition",`attachment;filename="`+project.Name+`.zip"`)
 	render.Data(w,r,zipBytes)
 }
 

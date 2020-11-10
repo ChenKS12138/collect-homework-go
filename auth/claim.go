@@ -12,7 +12,7 @@ import (
 type Code = uint32;
 
 
-// Create W; Update R+W; Read R; Delete X+W;
+// Create W; Read R; Update R+W; Delete X+W;
 const (
 	// CodeFileX file excuse
 	CodeFileX Code=0b1 << 0
