@@ -69,9 +69,13 @@ func serviceUpload(uploadDto *UploadDto,ip string) (dataResponse *util.DataRespo
 
 	// 文件写入&记录存储&邮件发送
 	storagePathPrefix := viper.GetString("STORAGE_PATH_PREFIX")
-	fileutil.TouchDirAll(filepath.Join(storagePathPrefix))
+	if !fileutil.Exist(storagePathPrefix) {
+		fileutil.TouchDirAll(filepath.Join(storagePathPrefix))
+	}
 	dirPath := filepath.Join(storagePathPrefix,lastProject.ID)
-	fileutil.TouchDirAll(dirPath)
+	if !fileutil.Exist(dirPath) {
+		fileutil.TouchDirAll(dirPath)
+	}
 	filePath := filepath.Join(dirPath,uploadDto.FileHeader.Filename)
 	fileBytes,err := ioutil.ReadAll(uploadDto.File)
 	if err != nil {
@@ -126,9 +130,13 @@ func serviceDownload(downloadDto *DownloadDto,claim *auth.Claim)(bytes *[]byte,f
 	}
 
 	storagePathPrefix := viper.GetString("STORAGE_PATH_PREFIX")
-	fileutil.TouchDirAll(filepath.Join(storagePathPrefix))
+	if !fileutil.Exist(storagePathPrefix) {
+		fileutil.TouchDirAll(filepath.Join(storagePathPrefix))
+	}
 	dirPath := filepath.Join(storagePathPrefix,project.ID)
-	fileutil.TouchDirAll(dirPath)
+	if !fileutil.Exist(dirPath) {
+		fileutil.TouchDirAll(dirPath)
+	}
 	zipFilePath := filepath.Join(storagePathPrefix,project.Name+"-"+string(time.Now().Unix())+".zip")
 	err = util.Zip(dirPath,zipFilePath)
 	if err != nil {
@@ -165,9 +173,13 @@ func serviceFileList(fileListDto *FileListDto,claim *auth.Claim)  (dataResponse 
 	}
 
 	storagePathPrefix := viper.GetString("STORAGE_PATH_PREFIX")
-	fileutil.TouchDirAll(filepath.Join(storagePathPrefix))
+	if !fileutil.Exist(filepath.Join(storagePathPrefix)) {
+		fileutil.TouchDirAll(filepath.Join(storagePathPrefix))
+	}
 	dirPath := filepath.Join(storagePathPrefix,fileListDto.ID)
-	fileutil.TouchDirAll(dirPath)
+	if !fileutil.Exist(dirPath) {
+		fileutil.TouchDirAll(dirPath)
+	}
 
 	files,err := ioutil.ReadDir(dirPath)
 
@@ -200,7 +212,9 @@ func serviceProjectSize(projectSizeDto *ProjectSizeDto,claim *auth.Claim)  (data
 
 	storagePathPrefix := viper.GetString("STORAGE_PATH_PREFIX")
 	dirPath := filepath.Join(storagePathPrefix,project.ID)
-	fileutil.TouchDirAll(dirPath)
+	if !fileutil.Exist(dirPath) {
+		fileutil.TouchDirAll(dirPath)
+	}
 	size,err := util.DirSizeB(dirPath)
 	if err != nil {
 		return nil,util.ErrRender(err)
