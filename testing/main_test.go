@@ -1,11 +1,6 @@
 package api_test
 
 import (
-	"github.com/ChenKS12138/collect-homework-go/api"
-	"github.com/ChenKS12138/collect-homework-go/auth"
-	"github.com/ChenKS12138/collect-homework-go/database/migrate"
-	"github.com/ChenKS12138/collect-homework-go/testing/service"
-	"github.com/ChenKS12138/collect-homework-go/util"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -15,6 +10,12 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/ChenKS12138/collect-homework-go/api"
+	"github.com/ChenKS12138/collect-homework-go/auth"
+	"github.com/ChenKS12138/collect-homework-go/database/migrate"
+	"github.com/ChenKS12138/collect-homework-go/testing/service"
+	"github.com/ChenKS12138/collect-homework-go/util"
 
 	"github.com/go-chi/jwtauth"
 	"github.com/spf13/viper"
@@ -43,7 +44,7 @@ func init(){
 	SuperAdmin.Email = viper.GetString("SUPER_USER_EMAIL")
 	SuperAdmin.Password = viper.GetString("SUPER_USER_PASSWORD")
 	SuperAdmin.Name = viper.GetString("SUPER_USER_NAME")
-	auth.TokenAuth =  jwtauth.New("HS256",[]byte(viper.GetString("JWT_SECRET")),nil)
+	auth.TokenAuth =  jwtauth.New("HS256",[]byte(viper.GetString("JWT_SECRET")+util.Version),nil)
 
 	srv,_ := api.NewServer()
 	Ts = httptest.NewServer(srv.Handler)

@@ -45,5 +45,5 @@ func LoadConfig(){
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
 
-	auth.TokenAuth =  jwtauth.New("HS256",[]byte(viper.GetString("JWT_SECRET")),nil)
+	auth.TokenAuth =  jwtauth.New("HS256",[]byte(viper.GetString("JWT_SECRET")+util.Version),nil)
 }
