@@ -1,30 +1,15 @@
 package storage
 
 import (
-	"crypto/md5"
-	"encoding/hex"
-	"io/ioutil"
 	"net/http"
-	"path/filepath"
-	"regexp"
 	"strconv"
-	"strings"
-	"time"
 
 	"github.com/ChenKS12138/collect-homework-go/auth"
-	"github.com/ChenKS12138/collect-homework-go/database"
-	"github.com/ChenKS12138/collect-homework-go/email"
-	"github.com/ChenKS12138/collect-homework-go/model"
-	"github.com/ChenKS12138/collect-homework-go/template"
 	"github.com/ChenKS12138/collect-homework-go/util"
 
-	"github.com/chenhg5/collection"
-	"github.com/coreos/etcd/pkg/fileutil"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/jwtauth"
 	"github.com/go-chi/render"
-	"github.com/spf13/viper"
-	"golang.org/x/crypto/bcrypt"
 )
 
 const maxFileSize = 100 * 1000 *1000
@@ -69,123 +54,24 @@ func upload(w http.ResponseWriter,r *http.Request){
 	ip := r.RemoteAddr
 	if err != nil {
 		render.Render(w,r,util.ErrRender(err))
-		return
-	}
-	uploadDto := &UploadDto{
-		File: file,
-		FileHeader: fileHeader,
-		ProjectID: r.FormValue("projectId"),
-		Secret: r.FormValue("secret"),
-	}
-	if err := uploadDto.validate(); err != nil {
-		render.Render(w,r,util.ErrRender(err))
-		return
-	}
-	if uploadDto.FileHeader.Size > maxFileSize {
-		render.Render(w,r,ErrFileSize)
-		return
-	}
-
-	// project存在检验
-	lastProject,err := database.Store.Project.SelectAdminEmailByID(uploadDto.ProjectID)
-	if lastProject == nil {
-		render.Render(w,r,ErrProjectNotExist)
-		return
-	}
-	if err !=nil  {
-		render.Render(w,r,util.ErrRender(err))
-		return
-	}
-
-	// 判断是否为第一次上传
-	lastSubmission,err := database.Store.Submission.SelectByProjectIDAndName(lastProject.ID,uploadDto.FileHeader.Filename)
-	if err != nil{
-		render.Render(w,r,util.ErrRender(err))
-		return
-	}
-	if lastSubmission != nil && (bcrypt.CompareHashAndPassword([]byte(lastSubmission.Secret),[]byte(uploadDto.Secret)) !=nil ){
-		render.Render(w,r,ErrFileSecret)
-		return
-	}
-
-	// 文件名/扩展名 正则检验
-	fileNamePrefix := uploadDto.FileHeader.Filename
-	if len(lastProject.FileNameExample)!=0 {
-		fileNameExtensionCollections := collection.Collect(lastProject.FileNameExtensions)
-		if fileNameExtensionCollections.Count() > 0 {
-			dotIndex := strings.LastIndex(fileNamePrefix,textDot)
-			if !fileNameExtensionCollections.Contains(fileNamePrefix[(dotIndex+1):]) {
-				render.Render(w,r,ErrFileNameExtensions)
-				return
+	} else {
+		uploadDto := &UploadDto{
+			File: file,
+			FileHeader: fileHeader,
+			ProjectID: r.FormValue("projectId"),
+			Secret: r.FormValue("secret"),
+		}
+		if err := uploadDto.validate(); err != nil {
+			render.Render(w,r,util.ErrRender(err))
+		} else {
+			data,err := serviceUpload(uploadDto,ip)
+			if err != nil {
+				render.Render(w,r,err)
+			} else {
+				render.Render(w,r,data)
 			}
-			fileNamePrefix = fileNamePrefix[:(dotIndex)]
 		}
 	}
-	if len(lastProject.FileNamePattern)!=0 {
-		ok,err := regexp.Match(lastProject.FileNamePattern,[]byte(fileNamePrefix))
-		if err!=nil {
-			render.Render(w,r,util.ErrRender(err))
-			return
-		}
-		if !ok {
-			render.Render(w,r,ErrFileNamePattern)
-			return
-		}
-	}
-	
-
-	// 文件写入&记录存储&邮件发送
-	storagePathPrefix := viper.GetString("STORAGE_PATH_PREFIX")
-	fileutil.TouchDirAll(filepath.Join(storagePathPrefix))
-	dirPath := filepath.Join(storagePathPrefix,lastProject.ID)
-	fileutil.TouchDirAll(dirPath)
-	filePath := filepath.Join(dirPath,uploadDto.FileHeader.Filename)
-	fileBytes,err := ioutil.ReadAll(uploadDto.File)
-	if err != nil {
-		render.Render(w,r,util.ErrRender(err))
-		return
-	}
-	if err = ioutil.WriteFile(filePath,fileBytes,0664);err !=nil {
-		render.Render(w,r,util.ErrRender(err))
-		return
-	}
-	secret,err := bcrypt.GenerateFromPassword([]byte(uploadDto.Secret),10)
-	if err != nil {
-		render.Render(w,r,util.ErrRender(err))
-		return
-	}
-	m:= md5.New()
-	m.Write(fileBytes);
-	md5Str := hex.EncodeToString(m.Sum(nil))
-	submission := &model.Submission{
-		FileName: uploadDto.FileHeader.Filename,
-		IP: ip,
-		ProjectID: uploadDto.ProjectID,
-		FilePath: filePath,
-		Secret: string(secret),
-		MD5: md5Str,
-	}
-	if err= database.Store.Submission.Insert(submission);err !=nil {
-		render.Render(w,r,util.ErrRender(err))
-		return
-	}
-	if lastProject.SendEmail {
-		statusText :=statusCreate
-		if lastSubmission != nil {
-			statusText = statusAlter
-		}
-		mailText,err := template.Submission(lastProject.Name,statusText,uploadDto.FileHeader.Filename,time.Now(),ip,md5Str)
-		if err!=nil {
-			render.Render(w,r,util.ErrRender(err))
-			return
-		}
-		err = email.SendMail(lastProject.AdminEmail,"New Submission",mailText)
-		if err!=nil {
-			render.Render(w,r,util.ErrRender(err))
-			return
-		}
-	}
-	render.JSON(w,r,util.NewDataResponse(true))
 }
 
 func download(w http.ResponseWriter,r *http.Request){
@@ -193,50 +79,26 @@ func download(w http.ResponseWriter,r *http.Request){
 	claim,err := auth.GenerateClaim(r)
 	if err != nil {
 		render.Render(w,r,util.ErrRender(err))
-		return
-	}
-	if !auth.VerifyAuthCode(claim.AuthCode,auth.CodeFileR+auth.CodeFileX) {
+	} else if !auth.VerifyAuthCode(claim.AuthCode,auth.CodeFileR+auth.CodeFileX) {
 		render.Render(w,r,util.ErrUnauthorized)
-		return
+	} else {
+		values:= r.URL.Query()
+		downloadDto := &DownloadDto{
+			ID: values.Get("id"),
+		}
+		if err := downloadDto.validate(); err != nil {
+			render.Render(w,r,util.ErrRender(err))
+		} else {
+			data,filename,err := serviceDownload(downloadDto,claim)
+			if err != nil {
+				render.Render(w,r,err)
+			} else {
+				w.Header().Set("Content-Length",strconv.FormatInt(int64(len(*data)),10))
+				w.Header().Set("Content-Disposition",`attachment;filename="`+filename+`.zip"`)
+				render.Data(w,r,*data)
+			}
+		}
 	}
-	values:= r.URL.Query()
-	downloadDto := &DownloadDto{
-		ID: values.Get("id"),
-	}
-	if err := downloadDto.validate(); err != nil {
-		render.Render(w,r,util.ErrRender(err))
-		return
-	}
-
-	// project 存在性检查
-	project,err := database.Store.Project.SelectByID(downloadDto.ID)
-	if err != nil {
-		render.Render(w,r,util.ErrRender(err))
-		return
-	}
-	if project == nil || (!claim.IsSuperAdmin && claim.ID != project.AdminID ) {
-		render.Render(w,r,ErrDownloadForbidden)
-		return
-	}
-
-	storagePathPrefix := viper.GetString("STORAGE_PATH_PREFIX")
-	fileutil.TouchDirAll(filepath.Join(storagePathPrefix))
-	dirPath := filepath.Join(storagePathPrefix,project.ID)
-	fileutil.TouchDirAll(dirPath)
-	zipFilePath := filepath.Join(storagePathPrefix,project.Name+"-"+string(time.Now().Unix())+".zip")
-	err = util.Zip(dirPath,zipFilePath)
-	if err != nil {
-		render.Render(w,r,util.ErrRender(err))
-		return
-	}
-	zipBytes,err := ioutil.ReadFile(zipFilePath)
-	if err != nil {
-		render.Render(w,r,util.ErrRender(err))
-		return
-	}
-	w.Header().Set("Content-Length",strconv.FormatInt(int64(len(zipBytes)),10))
-	w.Header().Set("Content-Disposition",`attachment;filename="`+project.Name+`.zip"`)
-	render.Data(w,r,zipBytes)
 }
 
 func fileCount(w http.ResponseWriter,r *http.Request){
@@ -246,18 +108,14 @@ func fileCount(w http.ResponseWriter,r *http.Request){
 	}
 	if err := fileCountDto.validate();err != nil {
 		render.Render(w,r,util.ErrRender(err))
-		return
+	} else {
+		data,err := serviceFileCount(fileCountDto)
+		if err != nil {
+			render.Render(w,r,err)
+		} else {
+			render.Render(w,r,data)
+		}
 	}
-	count,err := database.Store.Submission.SelectCountByProjectID(fileCountDto.ID)
-	if err != nil {
-		render.Render(w,r,util.ErrRender(err))
-		return
-	}
-	render.JSON(w,r,util.NewDataResponse(&struct{
-		Count int `json:"count"`
-	}{
-		Count: count,
-	}))
 }
 
 func fileList(w http.ResponseWriter,r *http.Request){
@@ -265,99 +123,46 @@ func fileList(w http.ResponseWriter,r *http.Request){
 	claim,err := auth.GenerateClaim(r)
 	if err != nil {
 		render.Render(w,r,util.ErrRender(err))
-		return
-	}
-	if !auth.VerifyAuthCode(claim.AuthCode,auth.CodeFileR) {
+	} else if !auth.VerifyAuthCode(claim.AuthCode,auth.CodeFileR) {
 		render.Render(w,r,util.ErrUnauthorized)
-		return
-	}
-	values := r.URL.Query()
-	fileListDto := &FileListDto{
-		ID: values.Get("id"),
-	}
-	if err := fileListDto.validate();err != nil {
-		render.Render(w,r,util.ErrRender(err))
-		return
-	}
-
-	 if !claim.IsSuperAdmin {
-		 project,err := database.Store.Project.SelectByAdminIDAndID(claim.ID,fileListDto.ID)
-		 if err != nil {
-			 render.Render(w,r,util.ErrRender(err))
-			 return
-		 }
-		 if project == nil {
-			 render.Render(w,r,ErrProjectPremissionDenied)
-			 return
-		 }
-	 }
-
-	storagePathPrefix := viper.GetString("STORAGE_PATH_PREFIX")
-	fileutil.TouchDirAll(filepath.Join(storagePathPrefix))
-	dirPath := filepath.Join(storagePathPrefix,fileListDto.ID)
-	fileutil.TouchDirAll(dirPath)
-
-	files,err := ioutil.ReadDir(dirPath)
-
-	if err != nil {
-		render.Render(w,r,util.ErrRender(err))
-		return
-	}
-
-	filelist := []string{}
-
-	for _,file := range(files) {
-		if !file.IsDir() {
-			filelist = append(filelist,file.Name())
+	} else {
+		values := r.URL.Query()
+		fileListDto := &FileListDto{
+			ID: values.Get("id"),
+		}
+		if err := fileListDto.validate();err != nil {
+			render.Render(w,r,util.ErrRender(err))
+		} else {
+			data,err := serviceFileList(fileListDto,claim)
+			if err != nil {
+				render.Render(w,r,err)
+			} else {
+				render.Render(w,r,data)
+			}
 		}
 	}
-	render.JSON(w,r,util.NewDataResponse(&struct{
-		Files []string `json:"files"`
-	}{
-		Files: filelist,
-	}))
 }
 
 func projectSize(w http.ResponseWriter,r *http.Request){
 	claim,err := auth.GenerateClaim(r);
 	if err != nil {
 		render.Render(w,r,util.ErrRender(err))
-		return
-	}
-	if !auth.VerifyAuthCode(claim.AuthCode,auth.CodeProjectR){
+	} else if !auth.VerifyAuthCode(claim.AuthCode,auth.CodeProjectR){
 		render.Render(w,r,util.ErrUnauthorized)
-		return
+	} else {
+		values := r.URL.Query()
+		projectSizeDto := &ProjectSizeDto{
+			ID: values.Get("id"),
+		}
+		if err := projectSizeDto.validate();err != nil {
+			render.Render(w,r,util.ErrRender(err))
+		} else {
+			data,err := serviceProjectSize(projectSizeDto,claim)
+			if err != nil {
+				render.Render(w,r,err)
+			} else {
+				render.Render(w,r,data)
+			}
+		}
 	}
-	values := r.URL.Query()
-	projectSizeDto := &ProjectSizeDto{
-		ID: values.Get("id"),
-	}
-	if err := projectSizeDto.validate();err != nil {
-		render.Render(w,r,util.ErrRender(err))
-		return
-	}
-
-	project,err := database.Store.Project.SelectByID(projectSizeDto.ID)
-	if err != nil {
-		render.Render(w,r,util.ErrRender(err))
-		return
-	}
-	if !claim.IsSuperAdmin && project.AdminID != claim.ID {
-		render.Render(w,r,ErrProjectPremissionDenied)
-		return
-	}
-
-	storagePathPrefix := viper.GetString("STORAGE_PATH_PREFIX")
-	dirPath := filepath.Join(storagePathPrefix,project.ID)
-	fileutil.TouchDirAll(dirPath)
-	size,err := util.DirSizeB(dirPath)
-	if err != nil {
-		render.Render(w,r,util.ErrRender(err))
-		return
-	}
-	render.JSON(w,r,util.NewDataResponse(&struct{
-		Size int64 `json:"size"`
-	} {
-		Size:size,
-	}))
 }

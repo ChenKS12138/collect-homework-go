@@ -25,6 +25,12 @@ func NewDataResponse(d interface{}) (*DataResponse){
 	}
 }
 
+// Render sets the application-specific error code in AppCode.
+func (d *DataResponse)Render(w http.ResponseWriter,r *http.Request) error {
+	render.Status(r,http.StatusOK)
+	return nil
+}
+
 // ErrResponse renderer type for handling all sorts of errors.
 type ErrResponse struct {
 	Err            error `json:"-"` // low-level runtime error
@@ -58,7 +64,7 @@ func ErrInvalidRequest(err error) render.Renderer {
 }
 
 // ErrRender returns status 422 Unprocessable Entity rendering response error.
-func ErrRender(err error) render.Renderer {
+func ErrRender(err error) (*ErrResponse) {
 	return &ErrResponse{
 		Err:            err,
 		HTTPStatusCode: http.StatusUnprocessableEntity,
