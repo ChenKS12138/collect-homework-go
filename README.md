@@ -44,7 +44,8 @@ EMAIL_USER=user@example.com
 EMAIL_PASSWORD=secret
 EMAIL_PREVENT=false
 
-STORAGE_PATH_PREFIX=./tmp
+STORAGE_PATH_PREFIX=./homework
+TEMP_PATH_PREFIX=./tmp
 
 SUPER_USER_NAME=admin
 SUPER_USER_EMAIL=admin@example.com

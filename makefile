@@ -18,7 +18,8 @@ migrate-init:
 
 test:export DB_DEBUG=false
 test:export EMAIL_PREVENT=true
-test:export STORAGE_PATH_PREFIX=../tmp
+test:export STORAGE_PATH_PREFIX=../homework
+test:export TEMP_PATH_PREFIX=../tmp
 test:
 	@$(CC) test -v ./testing
 
@@ -29,7 +30,7 @@ build-linux: clean
 	@env GOOS=linux GOARCH=amd64 $(CC) build -ldflags "-X '$(Module)/util.Version=$(Version)' -X '$(Module)/util.BuildTime=$(Date)'" -o ./build/main-linux-64 main.go
 
 clean:
-	@rm -rf ./build ./tmp
+	@rm -rf ./build ./tmp ./homework
 
 version:
 	@echo $(Version)

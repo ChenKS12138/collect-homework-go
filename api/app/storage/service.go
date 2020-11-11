@@ -130,14 +130,18 @@ func serviceDownload(downloadDto *DownloadDto,claim *auth.Claim)(bytes *[]byte,f
 	}
 
 	storagePathPrefix := viper.GetString("STORAGE_PATH_PREFIX")
+	tmpPathPrefix := viper.GetString("TEMP_PATH_PREFIX")
 	if !fileutil.Exist(storagePathPrefix) {
 		fileutil.TouchDirAll(filepath.Join(storagePathPrefix))
+	}
+	if !fileutil.Exist(tmpPathPrefix) {
+		fileutil.TouchDirAll(filepath.Join(tmpPathPrefix))
 	}
 	dirPath := filepath.Join(storagePathPrefix,project.ID)
 	if !fileutil.Exist(dirPath) {
 		fileutil.TouchDirAll(dirPath)
 	}
-	zipFilePath := filepath.Join(storagePathPrefix,project.Name+"-"+string(time.Now().Unix())+".zip")
+	zipFilePath := filepath.Join(tmpPathPrefix,project.Name+"-"+string(time.Now().Unix())+".zip")
 	err = util.Zip(dirPath,zipFilePath)
 	if err != nil {
 		return nil,"",util.ErrRender(err)
