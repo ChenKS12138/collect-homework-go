@@ -34,6 +34,9 @@ func Router()(*chi.Mux,error){
 
 		// require auth.CodeProjectW + auth.CodeProjectX
 		c.Post("/restore",restore)
+
+		// require auth.CodeFileR
+		c.Get("/fileList",fileList)
 	})
 
 	// public router
@@ -161,5 +164,30 @@ func list(w http.ResponseWriter, r *http.Request){
 		render.Render(w,r,err)
 	} else {
 		render.Render(w,r,data)
+	}
+}
+
+// filelist
+func fileList(w http.ResponseWriter, r*http.Request){
+	claim,err := auth.GenerateClaim(r)
+	if err != nil {
+		render.Render(w,r,util.ErrRender(err))
+	} else if !auth.VerifyAuthCode(claim.AuthCode,auth.CodeFileR) {
+		render.Render(w,r,util.ErrUnauthorized)
+	} else {
+		values := r.URL.Query()
+		fileListDto := &FileListDto{
+			ID: values.Get("id"),
+		}
+		if err := fileListDto.validate();err != nil {
+			render.Render(w,r,util.ErrRender(err))
+		} else {
+			data,err := serviceFileList(fileListDto,claim)
+			if err != nil {
+				render.Render(w,r,err)
+			} else {
+				render.Render(w,r,data)
+			}
+		}
 	}
 }

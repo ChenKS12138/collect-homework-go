@@ -2,16 +2,19 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 
 	"github.com/ChenKS12138/collect-homework-go/auth"
 	"github.com/ChenKS12138/collect-homework-go/util"
+	"github.com/coreos/etcd/pkg/fileutil"
 
 	"github.com/go-chi/jwtauth"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
+const tipFileName = "DON_NOT_TOUCH_THIS_DIR!!";
 
 // ConfigFile config path
 var ConfigFile string
@@ -46,4 +49,9 @@ func LoadConfig(){
 	}
 
 	auth.TokenAuth =  jwtauth.New("HS256",[]byte(viper.GetString("JWT_SECRET")+util.Version),nil)
+	storagePathPrefix := viper.GetString("STORAGE_PATH_PREFIX")
+	tipFilePath := filepath.Join(storagePathPrefix,tipFileName)
+	if !fileutil.Exist(tipFilePath) {
+		ioutil.WriteFile(tipFilePath,[]byte(tipFileName),0664)
+	}
 }

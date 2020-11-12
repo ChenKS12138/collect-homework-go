@@ -72,3 +72,17 @@ func (p * ProjectSizeDto)validate() error {
 	}
 	return err.Filter()
 }
+
+// DownloadSelectivelyDto download dto
+type DownloadSelectivelyDto struct {
+	ID string `json:"id"`
+	Code string `json:"code"`
+}
+
+func (d *DownloadSelectivelyDto)validate() error {
+	err := &validation.Errors{
+		"id":validation.Validate(d.ID,validation.Required,is.UUIDv4),
+		"code":validation.Validate(d.Code,validation.Required,is.Digit),
+	}
+	return err.Filter()
+}

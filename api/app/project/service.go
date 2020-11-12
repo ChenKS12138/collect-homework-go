@@ -125,3 +125,37 @@ func serviceList()(dataResponse *util.DataResponse,errResponse *util.ErrResponse
 		Projects: *projects,
 	}),nil
 }
+
+func serviceFileList(fileListDto *FileListDto,claim *auth.Claim) (dataResponse *util.DataResponse,errResponse *util.ErrResponse) {
+	type StorageFile struct {
+		Name string `json:"name"`
+		Seq int `json:"seq"`
+	}
+	if !claim.IsSuperAdmin {
+		project,err := database.Store.Project.SelectByAdminIDAndID(claim.ID,fileListDto.ID)
+		if err != nil {
+			return nil,util.ErrRender(err)
+		}
+		if project == nil {
+			return nil,ErrProjectPermission
+		}
+	}
+	
+	files,err := database.Store.Submission.SelectAllFile(fileListDto.ID)
+	if err != nil {
+		return nil,util.ErrRender(err);
+	}
+	storageFiles := []StorageFile{}
+	for index,file := range(*files){
+		storageFiles = append(storageFiles,StorageFile{
+			Name: file.FileName,
+			Seq: index+1,
+		})
+	}
+
+	return util.NewDataResponse(struct{
+		Files []StorageFile `json:"files"`
+	}{
+		Files: storageFiles,
+	}),nil
+}

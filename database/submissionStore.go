@@ -57,6 +57,42 @@ func (s *SubmissionStore)SelectByProjectIDAndName(projectID string,name string)(
 	return submission,err
 }
 
+// SelectAllFile select all file
+func (s *SubmissionStore)SelectAllFile(projectID string) (*[]model.Submission,error) {
+	submissions := &[]model.Submission{}
+	err := s.db.Model(submissions).
+		Where(`"project_id" = ?`,projectID).
+		ColumnExpr(`"file_name","min"("create_at") AS "create_at" `).
+		Group(`file_name`).
+		Order(`create_at DESC`).
+		Select()
+	if err == pg.ErrNoRows {
+		return nil,nil
+	}
+	return submissions,err
+}
+
+// SelectFilePathMap select file path map
+func (s *SubmissionStore)SelectFilePathMap(projectID string) (*map[string]string ,error) {
+	submissions := &[]model.Submission{}
+	err := s.db.Model(submissions).
+		Where(`project_id = ?`,projectID).
+		DistinctOn(`"file_name","file_path"`).
+		ColumnExpr(`"file_name","file_path"`).
+		Select()
+	if err == pg.ErrNoRows {
+		return nil,nil
+	}
+	if err != nil {
+		return nil,err;
+	}
+	filePathMap :=make(map[string]string);
+	for _,submission := range(*submissions) {
+		filePathMap[submission.FileName] = submission.FilePath
+	}
+	return &filePathMap,nil;
+}
+
 // Insert insert
 func (s *SubmissionStore)Insert(submission *model.Submission) error {
 	_,err := s.db.Model(submission).Insert();

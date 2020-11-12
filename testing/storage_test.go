@@ -336,3 +336,5 @@ func TestStorageProjectSize(t *testing.T){
 		t.Fatal(errors.New("Test Storage File List Fail (Super User2)"))
 	}
 }
+
+func TestDownloadSelectively(t *testing.T){}

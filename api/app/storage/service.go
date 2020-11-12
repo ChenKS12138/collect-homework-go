@@ -3,9 +3,12 @@ package storage
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"io"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -91,11 +94,15 @@ func serviceUpload(uploadDto *UploadDto,ip string) (dataResponse *util.DataRespo
 	m:= md5.New()
 	m.Write(fileBytes);
 	md5Str := hex.EncodeToString(m.Sum(nil))
+	abspath,err:=filepath.Abs(filePath)
+	if err != nil {
+		return nil,util.ErrRender(err)
+	}
 	submission := &model.Submission{
 		FileName: uploadDto.FileHeader.Filename,
 		IP: ip,
 		ProjectID: uploadDto.ProjectID,
-		FilePath: filePath,
+		FilePath: abspath,
 		Secret: string(secret),
 		MD5: md5Str,
 	}
@@ -141,7 +148,7 @@ func serviceDownload(downloadDto *DownloadDto,claim *auth.Claim)(bytes *[]byte,f
 	if !fileutil.Exist(dirPath) {
 		fileutil.TouchDirAll(dirPath)
 	}
-	zipFilePath := filepath.Join(tmpPathPrefix,project.Name+"-"+string(time.Now().Unix())+".zip")
+	zipFilePath := filepath.Join(tmpPathPrefix,project.Name+"-"+strconv.Itoa(int(time.Now().Unix()))+".zip")
 	err = util.Zip(dirPath,zipFilePath)
 	if err != nil {
 		return nil,"",util.ErrRender(err)
@@ -228,4 +235,60 @@ func serviceProjectSize(projectSizeDto *ProjectSizeDto,claim *auth.Claim)  (data
 	} {
 		Size:size,
 	}),nil
+}
+
+func serviceDownloadSelectively(downloadSelectivelyDto *DownloadSelectivelyDto,claim *auth.Claim)(bytes *[]byte,filename string,errResponse *util.ErrResponse){
+	// project 存在性检查
+	project,err := database.Store.Project.SelectByID(downloadSelectivelyDto.ID)
+	if err != nil {
+		return nil,"",util.ErrRender(err)
+	}
+	if project == nil || (!claim.IsSuperAdmin && claim.ID != project.AdminID ) {
+		return nil,"",ErrDownloadForbidden
+	}
+
+	storagePathPrefix := viper.GetString("STORAGE_PATH_PREFIX")
+	tmpPathPrefix := viper.GetString("TEMP_PATH_PREFIX")
+	if !fileutil.Exist(storagePathPrefix) {
+		fileutil.TouchDirAll(filepath.Join(storagePathPrefix))
+	}
+	if !fileutil.Exist(tmpPathPrefix) {
+		fileutil.TouchDirAll(filepath.Join(tmpPathPrefix))
+	}
+	// sourceDir := filepath.Join(storagePathPrefix,project.ID)
+	tmpDir := filepath.Join(tmpPathPrefix,project.ID+"_"+downloadSelectivelyDto.Code)
+	if !fileutil.Exist(tmpDir) {
+		fileutil.TouchDirAll(filepath.Join(tmpDir))
+	}
+	
+	downloadCode := util.ParseDownloadCode(downloadSelectivelyDto.Code)
+	filePathMap,err := database.Store.Submission.SelectFilePathMap(downloadSelectivelyDto.ID)
+	if err != nil {
+		return nil,"",util.ErrRender(err)
+	}
+	files,err := database.Store.Submission.SelectAllFile(downloadSelectivelyDto.ID)
+	if err != nil {
+		return nil,"",util.ErrRender(err)
+	}
+	codeLen := len(*downloadCode)
+	for fileIndex,file := range(*files) {
+		if fileIndex < codeLen && (*downloadCode)[fileIndex] == 1 {
+			sourceFilePath := filepath.Join((*filePathMap)[file.FileName])
+			tmpFilePath := filepath.Join(tmpDir,file.FileName)
+			if len(sourceFilePath) >0 && fileutil.Exist(sourceFilePath) {
+				source, _ := os.Open(sourceFilePath)
+        defer source.Close()
+				destination, _ := os.Create(tmpFilePath)
+        defer destination.Close()
+				io.Copy(destination,source)
+			}
+		}
+	}
+	zipFilePath := filepath.Join(tmpPathPrefix,project.Name+"_"+downloadSelectivelyDto.Code+"_"+strconv.Itoa(int(time.Now().Unix()))+".zip")
+	err = util.Zip(tmpDir,zipFilePath)
+	if err != nil {
+		return nil,"",util.ErrRender(err)
+	}
+	zipBytes,err := ioutil.ReadFile(zipFilePath)
+	return &zipBytes,project.Name,nil
 }

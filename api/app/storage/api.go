@@ -29,9 +29,14 @@ func Router()(*chi.Mux,error){
 		c.Use(jwtauth.Verifier(auth.TokenAuth))
 		c.Use(jwtauth.Authenticator)
 		
+		// !DEPRECATED
 		// require auth.CodeFileR + auth.CodeFileX
 		c.Get("/download",download)
 
+		// require auth.CodeFileR + auth.CodeFileX
+		c.Get("/downloadSelectively",downloadSelectively)
+
+		// !DEPRECATED
 		// require auth.CodeFileR
 		c.Get("/fileList",fileList)
 
@@ -162,6 +167,34 @@ func projectSize(w http.ResponseWriter,r *http.Request){
 				render.Render(w,r,err)
 			} else {
 				render.Render(w,r,data)
+			}
+		}
+	}
+}
+
+func downloadSelectively(w http.ResponseWriter,r *http.Request){
+	// 入参检查
+	claim,err := auth.GenerateClaim(r)
+	if err != nil {
+		render.Render(w,r,util.ErrRender(err))
+	} else if !auth.VerifyAuthCode(claim.AuthCode,auth.CodeFileR+auth.CodeFileX) {
+		render.Render(w,r,util.ErrUnauthorized)
+	} else {
+		values:= r.URL.Query()
+		downloadSelectivelyDto := &DownloadSelectivelyDto{
+			ID: values.Get("id"),
+			Code: values.Get("code"),
+		}
+		if err := downloadSelectivelyDto.validate(); err != nil {
+			render.Render(w,r,util.ErrRender(err))
+		} else {
+			data,filename,err := serviceDownloadSelectively(downloadSelectivelyDto,claim)
+			if err != nil {
+				render.Render(w,r,err)
+			} else {
+				w.Header().Set("Content-Length",strconv.FormatInt(int64(len(*data)),10))
+				w.Header().Set("Content-Disposition",`attachment;filename="`+filename+`.zip"`)
+				render.Data(w,r,*data)
 			}
 		}
 	}

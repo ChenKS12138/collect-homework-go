@@ -68,3 +68,16 @@ func (d *RestoreDto)validate() error {
 	}
 	return err.Filter()
 }
+
+
+// FileListDto file list dto
+type FileListDto struct {
+	ID string `json:"id"`
+}
+
+func(f *FileListDto)validate() error {
+	err := &validation.Errors{
+		"id":validation.Validate(f.ID,validation.Required,is.UUIDv4),
+	}
+	return err.Filter()
+}
