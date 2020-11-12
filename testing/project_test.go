@@ -2,10 +2,14 @@ package api_test
 
 import (
 	"errors"
+	"strings"
 	"testing"
 
+	"github.com/ChenKS12138/collect-homework-go/api/app/storage"
+	fileBytes "github.com/ChenKS12138/collect-homework-go/testing/bytes"
 	"github.com/ChenKS12138/collect-homework-go/testing/service"
 	"github.com/ChenKS12138/collect-homework-go/util"
+	"github.com/chenhg5/collection"
 )
 
 // GET /project/
@@ -242,4 +246,63 @@ func TestProjectDelete(t *testing.T){
 }
 
 
-func TestProjectFileList(t *testing.T){}
+func TestProjectFileList(t *testing.T){
+	projectNames := []string{ "B11111111-陈陈陈-实验1.doc", "B11111112-陈陈-实验1.doc"}
+	_,superUserToken,err := service.AdminLogin(Ts.URL,SuperAdmin.Email,SuperAdmin.Password)
+	if err != nil {
+		t.Fatal(err)
+	}
+	commonUserToken,err := generateAdmin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	commonUserToken2,err := generateAdmin()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_,err = service.ProjectInsert(Ts.URL,commonUserToken,"test_storage_upload_wrong_secret_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_,projects,err := service.ProjectOwn(Ts.URL,commonUserToken)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(*projects) != 1 {
+		t.Fatal(errors.New("Project Insert Abnormal"))
+	}
+	projectID := (*projects)[0].ID
+	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,projectNames[0],fileBytes.Docx)
+	if err != nil{
+		t.Fatal(err)
+	}
+	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,projectNames[1],fileBytes.Docx)
+	if err != nil{
+		t.Fatal(err)
+	}
+
+	// common user
+	_,filelist,err := service.StorageFileList(Ts.URL,commonUserToken,projectID)
+	if filelist== nil || 
+		!collection.Collect(filelist).Contains(projectNames[0]) ||
+		!collection.Collect(filelist).Contains(projectNames[1]) || 
+		collection.Collect(filelist).Count()!=2 {
+		t.Fatal(errors.New("Test Storage File List Fail (Common User)"))
+	}
+
+	// super user
+	_,filelist,err = service.StorageFileList(Ts.URL,superUserToken,projectID)
+	if filelist== nil || 
+	!collection.Collect(filelist).Contains(projectNames[0]) ||
+	!collection.Collect(filelist).Contains(projectNames[1]) || 
+	collection.Collect(filelist).Count()!=2 {
+		t.Fatal(errors.New("Test Storage File List Fail (Super User)"))
+	}
+
+	// common user2
+	ok,_,err := service.StorageFileList(Ts.URL,commonUserToken2,projectID)
+	if ok || !strings.Contains(err.Error(),storage.ErrProjectPremissionDenied.ErrorText) {
+		t.Fatal(errors.New("Test Storage File List Fail (Super User2)"))
+	}
+}

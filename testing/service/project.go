@@ -1,11 +1,12 @@
 package service
 
 import (
+	"errors"
+	"log"
+
 	"github.com/ChenKS12138/collect-homework-go/model"
 	"github.com/ChenKS12138/collect-homework-go/testing/request"
 	"github.com/ChenKS12138/collect-homework-go/util"
-	"errors"
-	"log"
 )
 
 // ProjectList project list
@@ -175,4 +176,16 @@ func ProjectDelete(baseURL string,token string,projectID string) (ok bool,err er
 		return false,errors.New("Update Response Fail")
 	}
 	return true,nil
+}
+
+// ProjectFileList project file list
+func ProjectFileList(baseURL string,token string,projectID string)(ok bool,filelist []string,err error) {
+	response,err := request.StorageFileList(baseURL+"/project/fileList",token,projectID)
+	if err != nil {
+		return false,nil,err
+	}
+	if !response.Success {
+		return false,nil,errors.New(response.ErrorText)
+	}
+	return true,response.Data.Files,nil
 }

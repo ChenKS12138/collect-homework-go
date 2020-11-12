@@ -62,3 +62,8 @@ func StorageProjectSize(baseURL string,token string,projectID string)(ok bool,si
 	}
 	return true,response.Data.Size,nil
 }
+
+// StorageDownloadSelectively storage download selectively
+func StorageDownloadSelectively(baseURL string,token string,projectID string,code string) (ok bool,err error){
+	return request.StorageDownloadSelectively(baseURL+"/storage/downloadSelectively",token,projectID,code)
+}

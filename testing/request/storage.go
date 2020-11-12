@@ -127,3 +127,26 @@ func StorageProjectSize(url string,token string,projectID string)(*struct {
 	},response)
 	return response,err
 }
+
+// StorageDownloadSelectively storage download selectively
+func StorageDownloadSelectively(url string,token string,projectID string,code string) (bool,error) {
+	req,_ := http.NewRequest("GET",url,nil)
+	header := &http.Header{}
+	header.Set("Authorization","Bearer "+token)
+	req.Header = *header
+	q := req.URL.Query()
+	q.Add("id",projectID)
+	q.Add("code",code)
+	req.URL.RawQuery = q.Encode()
+	res,err := client.Do(req)
+	if err != nil {
+		log.Println(err)
+		return false,err
+	}
+	if strings.Contains(res.Header.Get("Content-Type"),contentTypeJSON) {
+		responseByte,_ := ioutil.ReadAll(res.Body)
+		log.Println(string(responseByte))
+		return false,errors.New("Not Bytes Stream")
+	}
+	return true,nil
+}

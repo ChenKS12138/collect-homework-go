@@ -82,7 +82,7 @@ type DownloadSelectivelyDto struct {
 func (d *DownloadSelectivelyDto)validate() error {
 	err := &validation.Errors{
 		"id":validation.Validate(d.ID,validation.Required,is.UUIDv4),
-		"code":validation.Validate(d.Code,validation.Required,is.Digit),
+		"code":validation.Validate(d.Code,validation.Required,is.Hexadecimal,is.UpperCase),
 	}
 	return err.Filter()
 }
