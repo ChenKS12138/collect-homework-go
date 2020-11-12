@@ -149,7 +149,7 @@ func serviceFileList(fileListDto *FileListDto,claim *auth.Claim) (dataResponse *
 	for index,file := range(*files){
 		storageFiles = append(storageFiles,StorageFile{
 			Name: file.FileName,
-			Seq: index+1,
+			Seq: index,
 		})
 	}
 

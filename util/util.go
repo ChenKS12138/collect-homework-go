@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"syscall"
 )
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -59,13 +58,13 @@ func Iterator(steps int) func(callback func(key int)) {
 
 
 // FileCtime file ctime
-func FileCtime(filename string) (sec int64,err error) {
-    st := &syscall.Stat_t{}
-    if err = syscall.Stat(filename,st) ;err != nil {
-        return 0,err
-    }
-    return st.Ctimespec.Sec,nil
-}
+// func FileCtime(filename string) (sec int64,err error) {
+//     st := &syscall.Stat_t{}
+//     if err = syscall.Stat(filename,st) ;err != nil {
+//         return 0,err
+//     }
+//     return st.Ctimespec.Sec,nil
+// }
 
 var downloadCodeMap = map[rune]([]byte) {
     '0':{0,0,0,0},

@@ -1,8 +1,9 @@
 package request
 
 import (
-	"github.com/ChenKS12138/collect-homework-go/model"
 	"net/http"
+
+	"github.com/ChenKS12138/collect-homework-go/model"
 )
 
 // ProjectList project list
@@ -94,4 +95,31 @@ func ProjectUpdate(url string,token string, updateDto *struct {
 		return nil,err
 	}
 	return response,nil
+}
+
+// ProjectFileList project file list
+func ProjectFileList(url string,token string,projectID string) (*struct {
+	BasicResponse
+	Data struct {
+		Files []struct{
+			Name string `json:"name"`
+			Code string `json:"code"`
+		} `json:"files"`
+	} `json:"data"`
+},error) {
+	response := &struct {
+		BasicResponse
+		Data struct {
+			Files []struct{
+				Name string `json:"name"`
+				Code string `json:"code"`
+			} `json:"files"`
+		} `json:"data"`
+	}{}
+	header := &http.Header{}
+	header.Set("Authorization","Bearer "+token)
+	err := GetRequest(url,header,map[string]string{
+		"id":projectID,
+	},response)
+	return response,err
 }
