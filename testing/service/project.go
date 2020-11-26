@@ -23,17 +23,19 @@ func ProjectList(baseURL string) (ok bool,projects *[]model.ProjectWithAdminName
 }
 
 // ProjectInsert project insert
-func ProjectInsert(baseURL string,token string,fileNameExample string,pattern string,extensions []string) (ok bool,err error){
+func ProjectInsert(baseURL string,token string,fileNameExample string,pattern string,extensions []string,labels []string) (ok bool,err error){
 	newProject :=  &struct {
 		Name string `json:"name"`
 		FileNamePattern string `json:"fileNamePattern"`
 		FileNameExtensions []string `json:"fileNameExtensions"`
 		FileNameExample string `json:"fileNameExample"`
+		Labels []string `json:"labels"`
 	} {
 		Name: "project_name_"+util.RandString(10),
 		FileNamePattern: pattern,
 		FileNameExtensions: extensions,
 		FileNameExample: fileNameExample,
+		Labels: labels,
 	}
 	_,projectsBefore,err := ProjectList(baseURL)
 	if err != nil {
@@ -101,6 +103,7 @@ func ProjectUpdateName(baseURL string,token string,projectID string,fileNameExam
 			targetProject.FileNameExtensions = project.FileNameExtensions
 			targetProject.FileNamePattern = project.FileNamePattern
 			targetProject.ID = project.ID
+			targetProject.Labels = project.Labels
 			// targetProject.Name = projectName
 		}
 	}
@@ -114,6 +117,7 @@ func ProjectUpdateName(baseURL string,token string,projectID string,fileNameExam
 		FileNamePattern string `json:"fileNamePattern"`
 		FileNameExtensions []string `json:"fileNameExtensions"`
 		FileNameExample string `json:"fileNameExample"`
+		Labels []string `json:"labels"`
 	}{
 		ID: targetProject.ID,
 		Usable: true,
@@ -121,6 +125,7 @@ func ProjectUpdateName(baseURL string,token string,projectID string,fileNameExam
 		FileNamePattern: targetProject.FileNamePattern,
 		FileNameExtensions: targetProject.FileNameExtensions,
 		FileNameExample: targetProject.FileNameExample,
+		Labels: []string{"label1","label2","label3"},
 	})
 	if err != nil {
 		return false,err
@@ -160,6 +165,7 @@ func ProjectDelete(baseURL string,token string,projectID string) (ok bool,err er
 		FileNamePattern string `json:"fileNamePattern"`
 		FileNameExtensions []string `json:"fileNameExtensions"`
 		FileNameExample string `json:"fileNameExample"`
+		Labels []string `json:"labels"`
 	}{
 		ID: targetProject.ID,
 		Usable: false,
@@ -167,6 +173,7 @@ func ProjectDelete(baseURL string,token string,projectID string) (ok bool,err er
 		FileNamePattern: targetProject.FileNamePattern,
 		FileNameExtensions: targetProject.FileNameExtensions,
 		FileNameExample: targetProject.FileNameExample,
+		Labels: []string{},
 	})
 	if err != nil {
 		return false,err

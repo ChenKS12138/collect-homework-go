@@ -133,7 +133,7 @@ func TestAdminSubToken(t *testing.T){
 	if !ok {
 		t.Fatal("Test Admin SubToken, SuperAdmin Login Fail")
 	}
-	_,err := service.ProjectInsert(Ts.URL,token,"test_storage_upload"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc","docx"})
+	_,err := service.ProjectInsert(Ts.URL,token,"test_storage_upload"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc","docx"},[]string{"label1_"+util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -20,7 +20,7 @@ func TestStorageUpload(t *testing.T){
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.ProjectInsert(Ts.URL,token,"test_storage_upload"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc","docx"})
+	_,err = service.ProjectInsert(Ts.URL,token,"test_storage_upload"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc","docx"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -43,7 +43,7 @@ func TestStorageUploadWrongExtensions(t *testing.T){
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.ProjectInsert(Ts.URL,token,"test_storage_upload_wrong_extensions_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"zip","rar"})
+	_,err = service.ProjectInsert(Ts.URL,token,"test_storage_upload_wrong_extensions_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"zip","rar"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -66,7 +66,7 @@ func TestStorageUploadWrongFileName(t *testing.T){
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.ProjectInsert(Ts.URL,token,"test_storage_upload_wrong_filename_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"})
+	_,err = service.ProjectInsert(Ts.URL,token,"test_storage_upload_wrong_filename_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -89,7 +89,7 @@ func TestStorageUploadWrongSecret(t *testing.T){
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.ProjectInsert(Ts.URL,token,"test_storage_upload_wrong_secret_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"})
+	_,err = service.ProjectInsert(Ts.URL,token,"test_storage_upload_wrong_secret_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -129,7 +129,7 @@ func TestStorageFileCount(t *testing.T){
 		t.Fatal(err)
 	}
 
-	_,err = service.ProjectInsert(Ts.URL,commonUserToken,"test_storage_upload_wrong_secret_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"})
+	_,err = service.ProjectInsert(Ts.URL,commonUserToken,"test_storage_upload_wrong_secret_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -183,7 +183,7 @@ func TestStorageFileList(t *testing.T){
 		t.Fatal(err)
 	}
 
-	_,err = service.ProjectInsert(Ts.URL,commonUserToken,"test_storage_upload_wrong_secret_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"})
+	_,err = service.ProjectInsert(Ts.URL,commonUserToken,"test_storage_upload_wrong_secret_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -244,7 +244,7 @@ func TestStorageDownload(t *testing.T){
 		t.Fatal(err)
 	}
 
-	_,err = service.ProjectInsert(Ts.URL,commonUserToken,"test_storage_upload_wrong_secret_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"})
+	_,err = service.ProjectInsert(Ts.URL,commonUserToken,"test_storage_upload_wrong_secret_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -295,7 +295,7 @@ func TestStorageProjectSize(t *testing.T){
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.ProjectInsert(Ts.URL,commonUserToken1,"test_storage_upload_wrong_secret_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"})
+	_,err = service.ProjectInsert(Ts.URL,commonUserToken1,"test_storage_upload_wrong_secret_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -353,7 +353,7 @@ func TestDownloadSelectively(t *testing.T){
 		t.Fatal(err)
 	}
 
-	_,err = service.ProjectInsert(Ts.URL,commonUserToken,"test_storage_upload_wrong_secret_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"})
+	_,err = service.ProjectInsert(Ts.URL,commonUserToken,"test_storage_upload_wrong_secret_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -54,6 +54,7 @@ func ProjectInsert(url string,token string, insertDto *struct {
 	FileNamePattern string `json:"fileNamePattern"`
 	FileNameExtensions []string `json:"fileNameExtensions"`
 	FileNameExample string `json:"fileNameExample"`
+	Labels []string `json:"labels"`
 })(*struct {
 	BasicResponse
 	Data bool `json:"data"`
@@ -80,6 +81,7 @@ func ProjectUpdate(url string,token string, updateDto *struct {
 	FileNamePattern string `json:"fileNamePattern"`
 	FileNameExtensions []string `json:"fileNameExtensions"`
 	FileNameExample string `json:"fileNameExample"`
+	Labels []string `json:"labels"`
 })(*struct {
 	BasicResponse
 	Data bool `json:"data"`

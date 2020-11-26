@@ -11,6 +11,7 @@ type InsertDto struct {
 	FileNamePattern string `json:"fileNamePattern"`
 	FileNameExtensions []string `json:"fileNameExtensions"`
 	FileNameExample string 	`json:"fileNameExample"`
+	Labels []string `json:"labels"`
 }
 
 func (i *InsertDto)validate() error {
@@ -19,6 +20,7 @@ func (i *InsertDto)validate() error {
 		"fileNamePattern": validation.Validate(i.FileNamePattern,validation.NotNil),
 		"fileNameExtensions":validation.Validate(i.FileNameExtensions,validation.NotNil),
 		"fileNameExample":validation.Validate(i.FileNameExample,validation.NotNil),
+		"labels":validation.Validate(i.Labels,validation.NotNil),
 	}
 	return err.Filter()
 }
@@ -32,6 +34,7 @@ type UpdateDto struct {
 	FileNameExample string 	`json:"fileNameExample"`
 	SendEmail bool `json:"sendEmail"`
 	Visible bool `json:"visible"`
+	Labels []string `json:"labels"`
 }
 
 func (u *UpdateDto)validate() error {
@@ -41,6 +44,7 @@ func (u *UpdateDto)validate() error {
 		"fileNameExtensions":validation.Validate(u.FileNameExtensions,validation.NotNil),
 		"fileNameExample":validation.Validate(u.FileNameExample,validation.NotNil),
 		"usable":validation.Validate(u.Usable,validation.In(true,false)),
+		"labels":validation.Validate(u.Labels,validation.NotNil),
 	}
 	return err.Filter()
 }

@@ -36,6 +36,7 @@ func serviceInsert(insertDto *InsertDto,claim *auth.Claim) (dataResponse *util.D
 		FileNameExample: insertDto.FileNameExample,
 		FileNameExtensions: insertDto.FileNameExtensions,
 		FileNamePattern: insertDto.FileNamePattern,
+		Labels: insertDto.Labels,
 		Name: insertDto.Name,
 	}
 	
@@ -67,6 +68,7 @@ func serviceUpdate(updateDto *UpdateDto,claim *auth.Claim) (dataResponse *util.D
 	lastProject.Usable = updateDto.Usable
 	lastProject.SendEmail = updateDto.SendEmail
 	lastProject.Visible = updateDto.Visible
+	lastProject.Labels = updateDto.Labels
 
 	if err = database.Store.Project.Update(lastProject);err != nil {
 		return nil,util.ErrRender(err)

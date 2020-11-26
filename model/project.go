@@ -12,6 +12,7 @@ type Project struct {
 	Name string `json:"name,omitempty" pg:"name"`
 	AdminID string `json:"adminId,omitempty" pg:"admin_id"`
 	FileNamePattern string `json:"fileNamePattern" pg:"file_name_pattern"`
+	Labels []string `json:"labels" pg:"labels,array"`
 	FileNameExtensions []string `json:"fileNameExtensions" pg:"file_name_extensions,array"`
 	FileNameExample string `json:"fileNameExample" pg:"file_name_example"`
 	SendEmail bool `json:"sendEmail" pg:"send_email,notnull,use_zero,default:false"`
