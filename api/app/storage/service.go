@@ -292,3 +292,35 @@ func serviceDownloadSelectively(downloadSelectivelyDto *DownloadSelectivelyDto,c
 	zipBytes,err := ioutil.ReadFile(zipFilePath)
 	return &zipBytes,project.Name,nil
 }
+
+func serviceRawFile(rawFileDto *RawFileDto,claim *auth.Claim) (bytes *[]byte,filename string,errResponse *util.ErrResponse) {
+	// project 存在性检查
+	project,err := database.Store.Project.SelectByID(rawFileDto.ID)
+	if err != nil {
+		return nil,"",util.ErrRender(err)
+	}
+	if project == nil || (!claim.IsSuperAdmin && claim.ID != project.AdminID ) {
+		return nil,"",ErrDownloadForbidden
+	}
+
+	storagePathPrefix := viper.GetString("STORAGE_PATH_PREFIX")
+	if !fileutil.Exist(storagePathPrefix) {
+		fileutil.TouchDirAll(filepath.Join(storagePathPrefix))
+	}
+
+	filePathMap,err := database.Store.Submission.SelectFilePathMap(rawFileDto.ID)
+	if err != nil {
+		return nil,"",util.ErrRender(err)
+	}
+
+	for name,path := range(*filePathMap) {
+		if name == rawFileDto.FileName {
+			bytes,err := ioutil.ReadFile(path)
+			if err != nil {
+				return nil,"",util.ErrRender(err)
+			} 
+			return &bytes,name,nil
+		}
+	}
+	return nil,"",ErrFileNotFound; 
+}

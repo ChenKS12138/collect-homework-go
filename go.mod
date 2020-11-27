@@ -29,6 +29,7 @@ require (
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/ini.v1 v1.52.0 // indirect
 	gopkg.in/mail.v2 v2.3.1
+	github.com/h2non/filetype v1.1.0
 )
 
 go 1.14

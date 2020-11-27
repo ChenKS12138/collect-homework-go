@@ -150,3 +150,22 @@ func StorageDownloadSelectively(url string,token string,projectID string,code st
 	}
 	return true,nil
 }
+
+// StorageRawFile storage raw file
+func StorageRawFile(url string,token string,projectID string,filename string)(bool,error){
+	req,_ := http.NewRequest("GET",url+"/"+projectID+"/"+filename,nil)
+	q := req.URL.Query()
+	q.Add("jwt",token)
+	req.URL.RawQuery = q.Encode()
+	res,err := client.Do(req)
+	if err != nil {
+		log.Println(err)
+		return false,err
+	}
+	if strings.Contains(res.Header.Get("Content-Type"),contentTypeJSON) {
+		responseByte,_ := ioutil.ReadAll(res.Body)
+		log.Println(string(responseByte))
+		return false,errors.New("Not Bytes Stream")
+	}
+	return true,nil
+}

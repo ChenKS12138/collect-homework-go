@@ -6,6 +6,7 @@ import (
 
 	"github.com/ChenKS12138/collect-homework-go/auth"
 	"github.com/ChenKS12138/collect-homework-go/util"
+	"github.com/h2non/filetype"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/jwtauth"
@@ -35,6 +36,9 @@ func Router()(*chi.Mux,error){
 
 		// require auth.CodeFileR + auth.CodeFileX
 		c.Get("/downloadSelectively",downloadSelectively)
+
+		// require auth.CodeFileR + auth.CodeFileX
+		c.Get("/rawFile/{projectID}/{filename}",rawFile)
 
 		// !DEPRECATED
 		// require auth.CodeFileR
@@ -195,6 +199,37 @@ func downloadSelectively(w http.ResponseWriter,r *http.Request){
 				w.Header().Set("Content-Length",strconv.FormatInt(int64(len(*data)),10))
 				w.Header().Set("Content-Disposition",`attachment;filename="`+filename+`.zip"`)
 				render.Data(w,r,*data)
+			}
+		}
+	}
+}
+
+func rawFile(w http.ResponseWriter,r * http.Request){
+	// 入参检查
+	claim,err := auth.GenerateClaim(r)
+	if err != nil {
+		render.Render(w,r,util.ErrRender(err))
+	} else if !auth.VerifyAuthCode(claim.AuthCode,auth.CodeFileR + auth.CodeFileX) {
+		render.Render(w,r,util.ErrUnauthorized)
+	} else {
+		projectID := chi.URLParam(r,"projectID")
+		filename := chi.URLParam(r,"filename")
+		rawFileDto := &RawFileDto {
+			ID: projectID,
+			FileName: filename,
+		}
+		if err := rawFileDto.validate(); err != nil {
+			render.Render(w,r,util.ErrRender(err))
+		} else {
+			data,filename,err := serviceRawFile(rawFileDto,claim)
+			if err != nil {
+				render.Render(w,r,err)
+			} else {
+				w.Header().Set("Content-Length",strconv.FormatInt(int64(len(*data)),10))
+				w.Header().Set("Content-Disposition",`attachment;filename="`+filename)
+				d,_ := filetype.Get(*data)
+				w.Header().Set("Content-Type",d.MIME.Value)
+				w.Write(*data)
 			}
 		}
 	}

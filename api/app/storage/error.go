@@ -56,4 +56,11 @@ var (
 		ErrorText: "Project Permission Denied",
 		Version: util.Version,
 	}
+	// ErrFileNotFound project not found
+	ErrFileNotFound = &util.ErrResponse{
+		HTTPStatusCode: http.StatusOK,
+		StatusText: "Storage Error",
+		ErrorText: "File Not Found",
+		Version: util.Version,
+	}
 )

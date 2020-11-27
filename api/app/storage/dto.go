@@ -86,3 +86,17 @@ func (d *DownloadSelectivelyDto)validate() error {
 	}
 	return err.Filter()
 }
+
+// RawFileDto raw file dto
+type RawFileDto struct {
+	ID string `json:"id"`
+	FileName string `json:"id"`
+}
+
+func (r *RawFileDto)validate() error {
+	err := &validation.Errors{
+		"id":validation.Validate(r.ID,validation.Required,is.UUIDv4),
+		"filename":validation.Validate(r.FileName,validation.Required),
+	}
+	return err.Filter()
+}

@@ -67,3 +67,8 @@ func StorageProjectSize(baseURL string,token string,projectID string)(ok bool,si
 func StorageDownloadSelectively(baseURL string,token string,projectID string,code string) (ok bool,err error){
 	return request.StorageDownloadSelectively(baseURL+"/storage/downloadSelectively",token,projectID,code)
 }
+
+// StorageRawFile storage raw file
+func StorageRawFile(baseURL string,token string,projectID string,filename string) (ok bool,err error){
+	return request.StorageRawFile(baseURL+"/storage/rawFile",token,projectID,filename)
+}

@@ -65,11 +65,15 @@ func ErrInvalidRequest(err error) render.Renderer {
 
 // ErrRender returns status 422 Unprocessable Entity rendering response error.
 func ErrRender(err error) (*ErrResponse) {
+	errStr := ""
+	if err != nil {
+		errStr = err.Error()
+	}
 	return &ErrResponse{
 		Err:            err,
 		HTTPStatusCode: http.StatusUnprocessableEntity,
 		StatusText:     "Error rendering response.",
-		ErrorText:      err.Error(),
+		ErrorText:      errStr,
 		Success: false,
 		Version: Version,
 	}
