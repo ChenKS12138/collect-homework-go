@@ -1,6 +1,8 @@
 package project
 
 import (
+	"time"
+
 	"github.com/ChenKS12138/collect-homework-go/auth"
 	"github.com/ChenKS12138/collect-homework-go/database"
 	"github.com/ChenKS12138/collect-homework-go/model"
@@ -132,6 +134,7 @@ func serviceFileList(fileListDto *FileListDto,claim *auth.Claim) (dataResponse *
 	type StorageFile struct {
 		Name string `json:"name"`
 		Seq int `json:"seq"`
+		LastModify time.Time `json:"lastModifyTime"`
 	}
 	if !claim.IsSuperAdmin {
 		project,err := database.Store.Project.SelectByAdminIDAndID(claim.ID,fileListDto.ID)
@@ -147,11 +150,16 @@ func serviceFileList(fileListDto *FileListDto,claim *auth.Claim) (dataResponse *
 	if err != nil {
 		return nil,util.ErrRender(err);
 	}
+	modifyTimeMap,err := database.Store.Submission.SelectFileLastModifyTimeMap(fileListDto.ID)
+	if err !=nil {
+		return nil,util.ErrRender(err);
+	}
 	storageFiles := []StorageFile{}
 	for index,file := range(*files){
 		storageFiles = append(storageFiles,StorageFile{
 			Name: file.FileName,
 			Seq: index,
+			LastModify: (*modifyTimeMap)[file.FileName],
 		})
 	}
 

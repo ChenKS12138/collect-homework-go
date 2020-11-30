@@ -1,6 +1,9 @@
 package database
 
 import (
+	"errors"
+	"time"
+
 	"github.com/ChenKS12138/collect-homework-go/model"
 
 	"github.com/go-pg/pg/v10"
@@ -84,13 +87,37 @@ func (s *SubmissionStore)SelectFilePathMap(projectID string) (*map[string]string
 		return nil,nil
 	}
 	if err != nil {
-		return nil,err;
+		return nil,err
 	}
 	filePathMap :=make(map[string]string);
 	for _,submission := range(*submissions) {
 		filePathMap[submission.FileName] = submission.FilePath
 	}
-	return &filePathMap,nil;
+	return &filePathMap,nil
+}
+
+// SelectFileLastModifyTimeMap select file last modify time map
+func (s*SubmissionStore)SelectFileLastModifyTimeMap(projectID string)(*map[string](time.Time) ,error) {
+	submissions := &[]model.Submission{}
+	err := s.db.Model(submissions).
+		Where(`"project_id" = ?`,projectID).
+		ColumnExpr(`"file_name","max"("update_at") AS "update_at" `).
+		Group(`file_name`).
+		Select()
+	if err == pg.ErrNoRows {
+		return nil,nil
+	}
+	if err != nil {
+		return nil,err
+	}
+	filePathMap :=make(map[string](time.Time));
+	for _,submission := range(*submissions) {
+		filePathMap[submission.FileName] = submission.UpdateAt
+	}
+	if &filePathMap == nil {
+		return nil,errors.New("Not File Path Map")
+	}
+	return &filePathMap,nil
 }
 
 // Insert insert
