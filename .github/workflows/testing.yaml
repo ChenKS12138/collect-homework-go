@@ -48,3 +48,4 @@ jobs:
           SUPER_USER_PASSWORD: password
           EMAIL_PREVENT: true
           JWT_SECRET: secret
+          NO_CAPTCHA: true

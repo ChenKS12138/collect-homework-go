@@ -51,6 +51,8 @@ SUPER_USER_NAME=admin
 SUPER_USER_EMAIL=admin@example.com
 SUPER_USER_PASSWORD=password
 
+FONT_PATH=/Library/Fonts/Arial Unicode.ttf
+
 ```
 
 ## Support

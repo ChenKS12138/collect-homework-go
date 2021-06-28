@@ -3,6 +3,7 @@ package admin
 import (
 	"log"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/ChenKS12138/collect-homework-go/auth"
@@ -16,113 +17,140 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func checkCaptch(captcha *string, captchaToken *string) *util.ErrResponse {
+	if viper.GetBool("NO_CAPTCHA") {
+		return nil
+	}
+	secret := util.GenerateCapachaSecret()
+	realCaptcha, err := util.Decrypt(secret, captchaToken)
+	if err != nil || !strings.EqualFold(strings.ToLower(*realCaptcha), strings.ToLower(*(captcha))) {
+		return ErrCaptchaWrong
+	}
+	return nil
+}
+
 // serviceLogin servcie login
-func serviceLogin(loginDto *LoginDto) (dataResponse *util.DataResponse,errResponse *util.ErrResponse){
-	admin,err := database.Store.Admin.SelectByEmail(loginDto.Email);
-	if admin == nil || (bcrypt.CompareHashAndPassword([]byte(admin.Password),[]byte(loginDto.Password)) != nil) {
-		return nil,ErrAuthorization
-	} 
+func serviceLogin(loginDto *LoginDto) (dataResponse *util.DataResponse, errResponse *util.ErrResponse) {
+	captchaErr := checkCaptch(&loginDto.Captcha, &loginDto.CaptchaToken)
+	if captchaErr != nil {
+		return nil, captchaErr
+	}
+
+	admin, err := database.Store.Admin.SelectByEmail(loginDto.Email)
+	if admin == nil || (bcrypt.CompareHashAndPassword([]byte(admin.Password), []byte(loginDto.Password)) != nil) {
+		return nil, ErrAuthorization
+	}
 	if err != nil {
-		return nil,util.ErrRender(err)
+		return nil, util.ErrRender(err)
 	}
 
 	//full auth
 	authCode := auth.CodeFileX +
-							auth.CodeFileW +
-							auth.CodeFileR + 
-							auth.CodeProjectX +
-							auth.CodeProjectW +
-							auth.CodeProjectR +
-							auth.CodeAdminX +
-							auth.CodeAdminW +
-							auth.CodeAdminR
-		
+		auth.CodeFileW +
+		auth.CodeFileR +
+		auth.CodeProjectX +
+		auth.CodeProjectW +
+		auth.CodeProjectR +
+		auth.CodeAdminX +
+		auth.CodeAdminW +
+		auth.CodeAdminR
+
 	claim := &auth.Claim{
 		IsSuperAdmin: admin.IsSuperAdmin,
-		Email: admin.Email,
-		ID: admin.ID,
-		Name: admin.Name,
-		AuthCode: authCode,
+		Email:        admin.Email,
+		ID:           admin.ID,
+		Name:         admin.Name,
+		AuthCode:     authCode,
 	}
-	return util.NewDataResponse(claim.ToJwtClaim(time.Hour*4)),nil
+	return util.NewDataResponse(claim.ToJwtClaim(time.Hour * 4)), nil
 }
 
 // serviceInvitationCode service invitation code
-func serviceInvitationCode(invitationCodeDto *InvitationCodeDto) (dataResponse *util.DataResponse,errResponse *util.ErrResponse){
-	lastInvitationCode,err := database.Store.InvitationCode.SelectByEmail(invitationCodeDto.Email)
+func serviceInvitationCode(invitationCodeDto *InvitationCodeDto) (dataResponse *util.DataResponse, errResponse *util.ErrResponse) {
+	captchaErr := checkCaptch(&invitationCodeDto.Captcha, &invitationCodeDto.CaptchaToken)
+	if captchaErr != nil {
+		return nil, captchaErr
+	}
+
+	lastInvitationCode, err := database.Store.InvitationCode.SelectByEmail(invitationCodeDto.Email)
 
 	if lastInvitationCode != nil && lastInvitationCode.CreateAt.Add(time.Minute).After(time.Now()) {
-		return nil,ErrInvitationCodeFrequently
+		return nil, ErrInvitationCodeFrequently
 	}
 	if err != nil {
-		return nil,util.ErrRender(err)
+		return nil, util.ErrRender(err)
 	}
 
-	code := util.RandString(6);
+	code := util.RandString(6)
 
-	mailText,err := template.Registry(code,invitationCodeDto.Email,time.Now());
+	mailText, err := template.Registry(code, invitationCodeDto.Email, time.Now())
 
 	if err != nil {
-		return nil,util.ErrRender(err)
+		return nil, util.ErrRender(err)
 	}
-	if err :=email.SendMail(viper.GetString("EMAIL_USER"),"New Registry",mailText) ; err != nil {
+	if err := email.SendMail(viper.GetString("EMAIL_USER"), "New Registry", mailText); err != nil {
 		log.Println(err)
 	}
 
 	invitationCode := &model.InvitationCode{
 		Email: invitationCodeDto.Email,
-		Code: code,
+		Code:  code,
 	}
 	database.Store.InvitationCode.Insert(invitationCode)
-	return util.NewDataResponse(true),nil
+	return util.NewDataResponse(true), nil
 }
 
 // serviceRegister service register
-func serviceRegister(registerDto *RegisterDto) (dataResponse *util.DataResponse,errResponse *util.ErrResponse) {
-	invitationCode,err := database.Store.InvitationCode.SelectByEmail(registerDto.Email)
+func serviceRegister(registerDto *RegisterDto) (dataResponse *util.DataResponse, errResponse *util.ErrResponse) {
+	captchaErr := checkCaptch(&registerDto.Captcha, &registerDto.CaptchaToken)
+	if captchaErr != nil {
+		return nil, captchaErr
+	}
+
+	invitationCode, err := database.Store.InvitationCode.SelectByEmail(registerDto.Email)
 
 	if invitationCode == nil || invitationCode.Code != registerDto.InvitationCode {
-		return nil,ErrInvitationCodeWrong
+		return nil, ErrInvitationCodeWrong
 	}
-
-	if err !=nil {
-		return nil,util.ErrRender(err)
-	}
-
-	adminHasSameEmail,err := database.Store.Admin.SelectByEmail(registerDto.Email)
 
 	if err != nil {
-		return nil,util.ErrRender(err)
+		return nil, util.ErrRender(err)
+	}
+
+	adminHasSameEmail, err := database.Store.Admin.SelectByEmail(registerDto.Email)
+
+	if err != nil {
+		return nil, util.ErrRender(err)
 	}
 
 	if adminHasSameEmail != nil {
-		return nil,ErrEmailUsed
+		return nil, ErrEmailUsed
 	}
 
-	hashedPassword,err := bcrypt.GenerateFromPassword([]byte(registerDto.Password),10)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(registerDto.Password), 10)
 
 	admin := &model.Admin{
-		Email: registerDto.Email,
-		Password: string(hashedPassword),
-		Name:registerDto.Name,
+		Email:        registerDto.Email,
+		Password:     string(hashedPassword),
+		Name:         registerDto.Name,
 		IsSuperAdmin: false,
 	}
-	
-	if err := database.Store.Admin.Insert(admin); err !=nil {
-		return nil,util.ErrRender(err)
+
+	if err := database.Store.Admin.Insert(admin); err != nil {
+		return nil, util.ErrRender(err)
 	}
-	return util.NewDataResponse(true),nil
+	return util.NewDataResponse(true), nil
 }
 
 // serviceStatus servcie status
-func serviceStatus(claim *auth.Claim)(dataResponse *util.DataResponse,errResponse *util.ErrResponse){
-	fileCount,err := database.Store.Submission.SelectCountByAdminID(claim.ID)
+func serviceStatus(claim *auth.Claim) (dataResponse *util.DataResponse, errResponse *util.ErrResponse) {
+	fileCount, err := database.Store.Submission.SelectCountByAdminID(claim.ID)
 	if err != nil {
-		return nil,util.ErrRender(err)
+		return nil, util.ErrRender(err)
 	}
-	projects,err := database.Store.Project.SelectByAdminID(claim.ID)
+	projects, err := database.Store.Project.SelectByAdminID(claim.ID)
 	if err != nil {
-		return nil,util.ErrRender(err)
+		return nil, util.ErrRender(err)
 	}
 	projectCount := len(*projects)
 
@@ -130,34 +158,34 @@ func serviceStatus(claim *auth.Claim)(dataResponse *util.DataResponse,errRespons
 	fileutil.TouchDirAll(filepath.Join(storagePathPrefix))
 
 	totalSize := int64(0)
-	for _,project := range(*projects) {
-		dirPath := filepath.Join(storagePathPrefix,project.ID) 
+	for _, project := range *projects {
+		dirPath := filepath.Join(storagePathPrefix, project.ID)
 		fileutil.TouchDirAll(dirPath)
-		size,err := util.DirSizeB(dirPath)
+		size, err := util.DirSizeB(dirPath)
 		if err != nil {
-			return nil,util.ErrRender(err)
+			return nil, util.ErrRender(err)
 		}
-		totalSize+=size
+		totalSize += size
 	}
 
-	return util.NewDataResponse(&struct{
-		FileCount int `json:"fileCount"`
-		ProjectCount int `json:"projectCount"`
-		TotalSize int64 `json:"totalSize"`
-		Username string `json:"username"`
-		Email string `json:"email"`
-	} {
-		FileCount: fileCount,
+	return util.NewDataResponse(&struct {
+		FileCount    int    `json:"fileCount"`
+		ProjectCount int    `json:"projectCount"`
+		TotalSize    int64  `json:"totalSize"`
+		Username     string `json:"username"`
+		Email        string `json:"email"`
+	}{
+		FileCount:    fileCount,
 		ProjectCount: projectCount,
-		TotalSize: totalSize,
-		Username: claim.Name,
-		Email: claim.Email,
-	}),nil
+		TotalSize:    totalSize,
+		Username:     claim.Name,
+		Email:        claim.Email,
+	}), nil
 
 }
 
 // serviceSubToken servcie subToken
-func serviceSubToken(subTokenDto *SubTokenDto,claim *auth.Claim)(dataResponse *util.DataResponse,errResponse *util.ErrResponse){
+func serviceSubToken(subTokenDto *SubTokenDto, claim *auth.Claim) (dataResponse *util.DataResponse, errResponse *util.ErrResponse) {
 	claim.AuthCode = subTokenDto.AuthCode
-	return util.NewDataResponse(claim.ToJwtClaim((time.Duration(subTokenDto.Expire)*time.Minute))),nil
+	return util.NewDataResponse(claim.ToJwtClaim((time.Duration(subTokenDto.Expire) * time.Minute))), nil
 }
