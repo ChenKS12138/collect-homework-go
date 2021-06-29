@@ -34,7 +34,7 @@ var (
 )
 
 func GenerateCapachaSecret() *string {
-	nonce := time.Now().Unix() / int64(time.Minute.Seconds()*3)
+	nonce := time.Now().Unix() / int64(time.Minute.Seconds()*0.75)
 	secret := CapachaSecret + fmt.Sprintf("%d", nonce)
 	return &secret
 }
