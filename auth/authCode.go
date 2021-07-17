@@ -1,34 +1,33 @@
 package auth
 
 // Code auth code
-type Code = uint32;
-
+type Code = uint32
 
 // Create W; Read R; Update R+W; Delete X+W;
 const (
 	// CodeFileX file excuse
-	CodeFileX Code=0b1 << 0
+	CodeFileX Code = 0b1 << iota
 	// CodeFileW file read
-	CodeFileW Code=0b1 << 1
+	CodeFileW
 	// CodeFileR file write
-	CodeFileR Code=0b1 << 2
+	CodeFileR
 
 	// CodeProjectX file excuse
-	CodeProjectX Code=0b1 << 3
+	CodeProjectX
 	// CodeProjectW project excuse
-	CodeProjectW Code=0b1 << 4
+	CodeProjectW
 	// CodeProjectR project write
-	CodeProjectR Code=0b1 << 5
-	
+	CodeProjectR
+
 	// CodeAdminX admin excuse
-	CodeAdminX Code=0b1 << 6
+	CodeAdminX
 	// CodeAdminW admin read
-	CodeAdminW Code=0b1 << 7
+	CodeAdminW
 	// CodeAdminR admin write
-	CodeAdminR Code=0b1 << 8
+	CodeAdminR
 )
 
 // VerifyAuthCode verify auth code
-func VerifyAuthCode(src Code,target Code)bool{
-	return src & target == target;
+func VerifyAuthCode(src Code, target Code) bool {
+	return src&target == target
 }
