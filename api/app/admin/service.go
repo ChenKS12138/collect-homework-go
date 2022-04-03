@@ -21,7 +21,7 @@ func checkCaptch(captcha *string, captchaToken *string) *util.ErrResponse {
 	if viper.GetBool("NO_CAPTCHA") {
 		return nil
 	}
-	secret := util.GenerateCapachaSecret()
+	secret := util.GenerateCaptchaSecret()
 	realCaptcha, err := util.Decrypt(secret, captchaToken)
 	if err != nil || !strings.EqualFold(strings.ToLower(*realCaptcha), strings.ToLower(*(captcha))) {
 		return ErrCaptchaWrong

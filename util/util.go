@@ -30,12 +30,12 @@ var (
 	// captcha
 	CaptchaCap *captcha.Captcha
 	// secret
-	CapachaSecret string
+	CaptchaSecret string
 )
 
-func GenerateCapachaSecret() *string {
+func GenerateCaptchaSecret() *string {
 	nonce := time.Now().Unix() / int64(time.Minute.Seconds()*0.75)
-	secret := CapachaSecret + fmt.Sprintf("%d", nonce)
+	secret := CaptchaSecret + fmt.Sprintf("%d", nonce)
 	return &secret
 }
 
@@ -48,10 +48,10 @@ func RandString(n int) string {
 	return string(b)
 }
 
-// HashWithSolt hash with solt
-func HashWithSolt(password string, solt string) string {
+// HashWithSalt hash with salt
+func HashWithSalt(password string, salt string) string {
 	h := sha256.New()
-	h.Write([]byte(password + solt))
+	h.Write([]byte(password + salt))
 	return hex.EncodeToString(h.Sum(nil))
 }
 

@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/ChenKS12138/collect-homework-go/auth"
+	"github.com/ChenKS12138/collect-homework-go/resource"
 	"github.com/ChenKS12138/collect-homework-go/util"
 	"github.com/afocus/captcha"
 	"github.com/coreos/etcd/pkg/fileutil"
@@ -57,10 +58,13 @@ func LoadConfig() {
 		ioutil.WriteFile(tipFilePath, []byte(tipFileName), 0664)
 	}
 
-	fontPath := viper.GetString("FONT_PATH")
+	fontBytes, err := resource.Font.ReadFile("font/font.ttf")
+	if err != nil {
+		panic(err)
+	}
 	util.CaptchaCap = captcha.New()
-	util.CaptchaCap.SetFont(fontPath)
+	util.CaptchaCap.AddFontFromBytes(fontBytes)
 	util.CaptchaCap.SetSize(256, 128)
 	util.CaptchaCap.SetDisturbance(captcha.HIGH)
-	util.CapachaSecret = secret
+	util.CaptchaSecret = secret
 }

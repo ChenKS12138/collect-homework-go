@@ -15,16 +15,16 @@ import (
 )
 
 // POST /storage/upload
-func TestStorageUpload(t *testing.T){
-	token,err := generateAdmin()
+func TestStorageUpload(t *testing.T) {
+	token, err := generateAdmin()
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.ProjectInsert(Ts.URL,token,"test_storage_upload"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc","docx"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
+	_, err = service.ProjectInsert(Ts.URL+"/api", token, "test_storage_upload"+util.RandString(6), "^B\\d{8}-.{2,4}-.{2}\\d$", []string{"doc", "docx"}, []string{"label1_" + util.RandString(4), "label2_" + util.RandString(4), "label3_" + util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,projects,err := service.ProjectOwn(Ts.URL,token)
+	_, projects, err := service.ProjectOwn(Ts.URL+"/api", token)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -32,22 +32,22 @@ func TestStorageUpload(t *testing.T){
 		t.Fatal("Project Insert Abnormal")
 	}
 	projectID := (*projects)[0].ID
-	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,"B11111111-陈陈陈-实验1.doc",fileBytes.Docx)
+	_, err = service.StorageUpload(Ts.URL+"/api", util.RandString(6), projectID, "B11111111-陈陈陈-实验1.doc", fileBytes.Docx)
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestStorageUploadWrongExtensions(t *testing.T){
-	token,err := generateAdmin()
+func TestStorageUploadWrongExtensions(t *testing.T) {
+	token, err := generateAdmin()
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.ProjectInsert(Ts.URL,token,"test_storage_upload_wrong_extensions_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"zip","rar"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
+	_, err = service.ProjectInsert(Ts.URL+"/api", token, "test_storage_upload_wrong_extensions_"+util.RandString(6), "^B\\d{8}-.{2,4}-.{2}\\d$", []string{"zip", "rar"}, []string{"label1_" + util.RandString(4), "label2_" + util.RandString(4), "label3_" + util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,projects,err := service.ProjectOwn(Ts.URL,token)
+	_, projects, err := service.ProjectOwn(Ts.URL+"/api", token)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -55,22 +55,22 @@ func TestStorageUploadWrongExtensions(t *testing.T){
 		t.Fatal(errors.New("Project Insert Abnormal"))
 	}
 	projectID := (*projects)[0].ID
-	ok,err := service.StorageUpload(Ts.URL,util.RandString(6),projectID,"B11111111-陈陈陈-实验1.doc",fileBytes.Docx)
-	if ok || ! strings.Contains(err.Error(),storage.ErrFileNameExtensions.ErrorText){
+	ok, err := service.StorageUpload(Ts.URL+"/api", util.RandString(6), projectID, "B11111111-陈陈陈-实验1.doc", fileBytes.Docx)
+	if ok || !strings.Contains(err.Error(), storage.ErrFileNameExtensions.ErrorText) {
 		t.Fatal(errors.New("Test Storage Upload Wrong Wrong Extensions Fail"))
 	}
 }
 
-func TestStorageUploadWrongFileName(t *testing.T){
-	token,err := generateAdmin()
+func TestStorageUploadWrongFileName(t *testing.T) {
+	token, err := generateAdmin()
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.ProjectInsert(Ts.URL,token,"test_storage_upload_wrong_filename_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
+	_, err = service.ProjectInsert(Ts.URL+"/api", token, "test_storage_upload_wrong_filename_"+util.RandString(6), "^B\\d{8}-.{2,4}-.{2}\\d$", []string{"doc"}, []string{"label1_" + util.RandString(4), "label2_" + util.RandString(4), "label3_" + util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,projects,err := service.ProjectOwn(Ts.URL,token)
+	_, projects, err := service.ProjectOwn(Ts.URL+"/api", token)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,22 +78,22 @@ func TestStorageUploadWrongFileName(t *testing.T){
 		t.Fatal(errors.New("Project Insert Abnormal"))
 	}
 	projectID := (*projects)[0].ID
-	ok,err := service.StorageUpload(Ts.URL,util.RandString(6),projectID,"B11111111.doc",fileBytes.Docx)
-	if ok || ! strings.Contains(err.Error(),storage.ErrFileNamePattern.ErrorText){
+	ok, err := service.StorageUpload(Ts.URL+"/api", util.RandString(6), projectID, "B11111111.doc", fileBytes.Docx)
+	if ok || !strings.Contains(err.Error(), storage.ErrFileNamePattern.ErrorText) {
 		t.Fatal(errors.New("Test Storage Upload Wrong Extensions Fail"))
 	}
 }
 
-func TestStorageUploadWrongSecret(t *testing.T){
-	token,err := generateAdmin()
+func TestStorageUploadWrongSecret(t *testing.T) {
+	token, err := generateAdmin()
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.ProjectInsert(Ts.URL,token,"test_storage_upload_wrong_secret_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
+	_, err = service.ProjectInsert(Ts.URL+"/api", token, "test_storage_upload_wrong_secret_"+util.RandString(6), "^B\\d{8}-.{2,4}-.{2}\\d$", []string{"doc"}, []string{"label1_" + util.RandString(4), "label2_" + util.RandString(4), "label3_" + util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,projects,err := service.ProjectOwn(Ts.URL,token)
+	_, projects, err := service.ProjectOwn(Ts.URL+"/api", token)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -103,37 +103,37 @@ func TestStorageUploadWrongSecret(t *testing.T){
 	projectID := (*projects)[0].ID
 	fileName := "B11111111-陈陈陈-实验1.doc"
 	secret := util.RandString(6)
-	_,err = service.StorageUpload(Ts.URL,secret,projectID,fileName,fileBytes.Docx)
-	if err != nil{
+	_, err = service.StorageUpload(Ts.URL+"/api", secret, projectID, fileName, fileBytes.Docx)
+	if err != nil {
 		t.Fatal(err)
 	}
-	
-	ok,err := service.StorageUpload(Ts.URL,secret+"_wrong_suffix",projectID,fileName,fileBytes.Docx)
-	if ok || ! strings.Contains(err.Error(),storage.ErrFileSecret.ErrorText){
+
+	ok, err := service.StorageUpload(Ts.URL+"/api", secret+"_wrong_suffix", projectID, fileName, fileBytes.Docx)
+	if ok || !strings.Contains(err.Error(), storage.ErrFileSecret.ErrorText) {
 		t.Fatal("Test Storage Upload Fail (Expect ErrFileSecret)")
 	}
-	_,err = service.StorageUpload(Ts.URL,secret,projectID,fileName,fileBytes.Docx)
-	if err != nil{
+	_, err = service.StorageUpload(Ts.URL+"/api", secret, projectID, fileName, fileBytes.Docx)
+	if err != nil {
 		t.Fatal(err)
 		t.Fatal("Test Storage Upload Fail (Expect Overwriting Success)")
 	}
 }
 
-func TestStorageFileCount(t *testing.T){
-	_,superUserToken,err := service.AdminLogin(Ts.URL,SuperAdmin.Email,SuperAdmin.Password)
+func TestStorageFileCount(t *testing.T) {
+	_, superUserToken, err := service.AdminLogin(Ts.URL+"/api", SuperAdmin.Email, SuperAdmin.Password)
 	if err != nil {
 		t.Fatal(err)
 	}
-	commonUserToken,err := generateAdmin()
+	commonUserToken, err := generateAdmin()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_,err = service.ProjectInsert(Ts.URL,commonUserToken,"test_storage_upload_wrong_secret_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
+	_, err = service.ProjectInsert(Ts.URL+"/api", commonUserToken, "test_storage_upload_wrong_secret_"+util.RandString(6), "^B\\d{8}-.{2,4}-.{2}\\d$", []string{"doc"}, []string{"label1_" + util.RandString(4), "label2_" + util.RandString(4), "label3_" + util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,projects,err := service.ProjectOwn(Ts.URL,commonUserToken)
+	_, projects, err := service.ProjectOwn(Ts.URL+"/api", commonUserToken)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -141,16 +141,16 @@ func TestStorageFileCount(t *testing.T){
 		t.Fatal(errors.New("Project Insert Abnormal"))
 	}
 	projectID := (*projects)[0].ID
-	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,"B11111111-陈陈陈-实验1.doc",fileBytes.Docx)
-	if err != nil{
+	_, err = service.StorageUpload(Ts.URL+"/api", util.RandString(6), projectID, "B11111111-陈陈陈-实验1.doc", fileBytes.Docx)
+	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,"B11111112-陈陈-实验1.doc",fileBytes.Docx)
-	if err != nil{
+	_, err = service.StorageUpload(Ts.URL+"/api", util.RandString(6), projectID, "B11111112-陈陈-实验1.doc", fileBytes.Docx)
+	if err != nil {
 		t.Fatal(err)
 	}
 
-	_,count,err := service.StorageFileCount(Ts.URL,commonUserToken,projectID)
+	_, count, err := service.StorageFileCount(Ts.URL+"/api", commonUserToken, projectID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -158,7 +158,7 @@ func TestStorageFileCount(t *testing.T){
 		t.Fatal(errors.New("Test Stroage File Count Fail"))
 	}
 
-	_,count,err = service.StorageFileCount(Ts.URL,superUserToken,projectID)
+	_, count, err = service.StorageFileCount(Ts.URL+"/api", superUserToken, projectID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -168,26 +168,26 @@ func TestStorageFileCount(t *testing.T){
 
 }
 
-func TestStorageFileList(t *testing.T){
-	projectNames := []string{ "B11111111-陈陈陈-实验1.doc", "B11111112-陈陈-实验1.doc"}
-	_,superUserToken,err := service.AdminLogin(Ts.URL,SuperAdmin.Email,SuperAdmin.Password)
+func TestStorageFileList(t *testing.T) {
+	projectNames := []string{"B11111111-陈陈陈-实验1.doc", "B11111112-陈陈-实验1.doc"}
+	_, superUserToken, err := service.AdminLogin(Ts.URL+"/api", SuperAdmin.Email, SuperAdmin.Password)
 	if err != nil {
 		t.Fatal(err)
 	}
-	commonUserToken,err := generateAdmin()
+	commonUserToken, err := generateAdmin()
 	if err != nil {
 		t.Fatal(err)
 	}
-	commonUserToken2,err := generateAdmin()
+	commonUserToken2, err := generateAdmin()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_,err = service.ProjectInsert(Ts.URL,commonUserToken,"test_storage_upload_wrong_secret_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
+	_, err = service.ProjectInsert(Ts.URL+"/api", commonUserToken, "test_storage_upload_wrong_secret_"+util.RandString(6), "^B\\d{8}-.{2,4}-.{2}\\d$", []string{"doc"}, []string{"label1_" + util.RandString(4), "label2_" + util.RandString(4), "label3_" + util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,projects,err := service.ProjectOwn(Ts.URL,commonUserToken)
+	_, projects, err := service.ProjectOwn(Ts.URL+"/api", commonUserToken)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -195,60 +195,60 @@ func TestStorageFileList(t *testing.T){
 		t.Fatal(errors.New("Project Insert Abnormal"))
 	}
 	projectID := (*projects)[0].ID
-	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,projectNames[0],fileBytes.Docx)
-	if err != nil{
+	_, err = service.StorageUpload(Ts.URL+"/api", util.RandString(6), projectID, projectNames[0], fileBytes.Docx)
+	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,projectNames[1],fileBytes.Docx)
-	if err != nil{
+	_, err = service.StorageUpload(Ts.URL+"/api", util.RandString(6), projectID, projectNames[1], fileBytes.Docx)
+	if err != nil {
 		t.Fatal(err)
 	}
 
 	// common user
-	_,filelist,err := service.StorageFileList(Ts.URL,commonUserToken,projectID)
-	if filelist== nil || 
+	_, filelist, err := service.StorageFileList(Ts.URL+"/api", commonUserToken, projectID)
+	if filelist == nil ||
 		!collection.Collect(filelist).Contains(projectNames[0]) ||
-		!collection.Collect(filelist).Contains(projectNames[1]) || 
-		collection.Collect(filelist).Count()!=2 {
+		!collection.Collect(filelist).Contains(projectNames[1]) ||
+		collection.Collect(filelist).Count() != 2 {
 		t.Fatal(errors.New("Test Storage File List Fail (Common User)"))
 	}
 
 	// super user
-	_,filelist,err = service.StorageFileList(Ts.URL,superUserToken,projectID)
-	if filelist== nil || 
-	!collection.Collect(filelist).Contains(projectNames[0]) ||
-	!collection.Collect(filelist).Contains(projectNames[1]) || 
-	collection.Collect(filelist).Count()!=2 {
+	_, filelist, err = service.StorageFileList(Ts.URL+"/api", superUserToken, projectID)
+	if filelist == nil ||
+		!collection.Collect(filelist).Contains(projectNames[0]) ||
+		!collection.Collect(filelist).Contains(projectNames[1]) ||
+		collection.Collect(filelist).Count() != 2 {
 		t.Fatal(errors.New("Test Storage File List Fail (Super User)"))
 	}
 
 	// common user2
-	ok,_,err := service.StorageFileList(Ts.URL,commonUserToken2,projectID)
-	if ok || !strings.Contains(err.Error(),storage.ErrProjectPremissionDenied.ErrorText) {
+	ok, _, err := service.StorageFileList(Ts.URL+"/api", commonUserToken2, projectID)
+	if ok || !strings.Contains(err.Error(), storage.ErrProjectPremissionDenied.ErrorText) {
 		t.Fatal(errors.New("Test Storage File List Fail (Super User2)"))
 	}
 }
 
-func TestStorageDownload(t *testing.T){
-	projectNames := []string{ "B11111111-陈陈陈-实验1.doc", "B11111112-陈陈-实验1.doc"}
-	_,superUserToken,err := service.AdminLogin(Ts.URL,SuperAdmin.Email,SuperAdmin.Password)
+func TestStorageDownload(t *testing.T) {
+	projectNames := []string{"B11111111-陈陈陈-实验1.doc", "B11111112-陈陈-实验1.doc"}
+	_, superUserToken, err := service.AdminLogin(Ts.URL+"/api", SuperAdmin.Email, SuperAdmin.Password)
 	if err != nil {
 		t.Fatal(err)
 	}
-	commonUserToken,err := generateAdmin()
+	commonUserToken, err := generateAdmin()
 	if err != nil {
 		t.Fatal(err)
 	}
-	commonUserToken2,err := generateAdmin()
+	commonUserToken2, err := generateAdmin()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_,err = service.ProjectInsert(Ts.URL,commonUserToken,"test_storage_upload_wrong_secret_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
+	_, err = service.ProjectInsert(Ts.URL+"/api", commonUserToken, "test_storage_upload_wrong_secret_"+util.RandString(6), "^B\\d{8}-.{2,4}-.{2}\\d$", []string{"doc"}, []string{"label1_" + util.RandString(4), "label2_" + util.RandString(4), "label3_" + util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,projects,err := service.ProjectOwn(Ts.URL,commonUserToken)
+	_, projects, err := service.ProjectOwn(Ts.URL+"/api", commonUserToken)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -256,50 +256,50 @@ func TestStorageDownload(t *testing.T){
 		t.Fatal(errors.New("Project Insert Abnormal"))
 	}
 	projectID := (*projects)[0].ID
-	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,projectNames[0],fileBytes.Docx)
-	if err != nil{
+	_, err = service.StorageUpload(Ts.URL+"/api", util.RandString(6), projectID, projectNames[0], fileBytes.Docx)
+	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,projectNames[1],fileBytes.Docx)
-	if err != nil{
-		t.Fatal(err)
-	}
-
-	_,err = service.StorageDownload(Ts.URL,commonUserToken,projectID)
+	_, err = service.StorageUpload(Ts.URL+"/api", util.RandString(6), projectID, projectNames[1], fileBytes.Docx)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_,err = service.StorageDownload(Ts.URL,superUserToken,projectID)
+	_, err = service.StorageDownload(Ts.URL+"/api", commonUserToken, projectID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	ok,err := service.StorageDownload(Ts.URL,commonUserToken2,projectID)
-	if ok || ! strings.Contains(err.Error(),"Not Bytes Stream") {
+	_, err = service.StorageDownload(Ts.URL+"/api", superUserToken, projectID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ok, err := service.StorageDownload(Ts.URL+"/api", commonUserToken2, projectID)
+	if ok || !strings.Contains(err.Error(), "Not Bytes Stream") {
 		t.Fatal("Storage Download Fail")
 	}
 }
 
-func TestStorageProjectSize(t *testing.T){
-	projectNames := []string{ "B11111111-陈陈陈-实验1.doc", "B11111112-陈陈-实验1.doc"}
-	_,superUserToken,err := service.AdminLogin(Ts.URL,SuperAdmin.Email,SuperAdmin.Password)
+func TestStorageProjectSize(t *testing.T) {
+	projectNames := []string{"B11111111-陈陈陈-实验1.doc", "B11111112-陈陈-实验1.doc"}
+	_, superUserToken, err := service.AdminLogin(Ts.URL+"/api", SuperAdmin.Email, SuperAdmin.Password)
 	if err != nil {
 		t.Fatal(err)
 	}
-	commonUserToken1 ,err := generateAdmin()
+	commonUserToken1, err := generateAdmin()
 	if err != nil {
 		t.Fatal(err)
 	}
-	commonUserToken2,err := generateAdmin()
+	commonUserToken2, err := generateAdmin()
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.ProjectInsert(Ts.URL,commonUserToken1,"test_storage_upload_wrong_secret_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
+	_, err = service.ProjectInsert(Ts.URL+"/api", commonUserToken1, "test_storage_upload_wrong_secret_"+util.RandString(6), "^B\\d{8}-.{2,4}-.{2}\\d$", []string{"doc"}, []string{"label1_" + util.RandString(4), "label2_" + util.RandString(4), "label3_" + util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,projects,err := service.ProjectOwn(Ts.URL,commonUserToken1)
+	_, projects, err := service.ProjectOwn(Ts.URL+"/api", commonUserToken1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -307,57 +307,56 @@ func TestStorageProjectSize(t *testing.T){
 		t.Fatal(errors.New("Project Insert Abnormal"))
 	}
 	projectID := (*projects)[0].ID
-	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,projectNames[0],fileBytes.Docx)
-	if err != nil{
+	_, err = service.StorageUpload(Ts.URL+"/api", util.RandString(6), projectID, projectNames[0], fileBytes.Docx)
+	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,projectNames[1],fileBytes.Docx)
-	if err != nil{
+	_, err = service.StorageUpload(Ts.URL+"/api", util.RandString(6), projectID, projectNames[1], fileBytes.Docx)
+	if err != nil {
 		t.Fatal(err)
 	}
 
 	// common user
-	_,size,err := service.StorageProjectSize(Ts.URL,commonUserToken1,projectID)
-	if err!=nil || size ==0 {
-		log.Println(err,size);
+	_, size, err := service.StorageProjectSize(Ts.URL+"/api", commonUserToken1, projectID)
+	if err != nil || size == 0 {
+		log.Println(err, size)
 		t.Fatal(errors.New("Test Storage Project Size Fail (Common User)"))
 	}
 
 	// super user
-	_,size,err = service.StorageProjectSize(Ts.URL,superUserToken,projectID)
+	_, size, err = service.StorageProjectSize(Ts.URL+"/api", superUserToken, projectID)
 	if err != nil || size == 0 {
-		log.Println(err,size)
+		log.Println(err, size)
 		t.Fatal(errors.New("Test Storage Project Size Fail (Super User)"))
 	}
 
 	// common user2
-	ok,_,err := service.StorageProjectSize(Ts.URL,commonUserToken2,projectID)
-	if ok || !strings.Contains(err.Error(),storage.ErrProjectPremissionDenied.ErrorText) {
+	ok, _, err := service.StorageProjectSize(Ts.URL+"/api", commonUserToken2, projectID)
+	if ok || !strings.Contains(err.Error(), storage.ErrProjectPremissionDenied.ErrorText) {
 		t.Fatal(errors.New("Test Storage File List Fail (Super User2)"))
 	}
 }
 
+func TestDownloadSelectively(t *testing.T) {
+	projectNames := []string{"B11111111-陈陈陈-实验1.doc", "B11111112-陈陈-实验1.doc"}
+	_, superUserToken, err := service.AdminLogin(Ts.URL+"/api", SuperAdmin.Email, SuperAdmin.Password)
+	if err != nil {
+		t.Fatal(err)
+	}
+	commonUserToken, err := generateAdmin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	commonUserToken2, err := generateAdmin()
+	if err != nil {
+		t.Fatal(err)
+	}
 
-func TestDownloadSelectively(t *testing.T){
-	projectNames := []string{ "B11111111-陈陈陈-实验1.doc", "B11111112-陈陈-实验1.doc"}
-	_,superUserToken,err := service.AdminLogin(Ts.URL,SuperAdmin.Email,SuperAdmin.Password)
+	_, err = service.ProjectInsert(Ts.URL+"/api", commonUserToken, "test_storage_upload_wrong_secret_"+util.RandString(6), "^B\\d{8}-.{2,4}-.{2}\\d$", []string{"doc"}, []string{"label1_" + util.RandString(4), "label2_" + util.RandString(4), "label3_" + util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
-	commonUserToken,err := generateAdmin()
-	if err != nil {
-		t.Fatal(err)
-	}
-	commonUserToken2,err := generateAdmin()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	_,err = service.ProjectInsert(Ts.URL,commonUserToken,"test_storage_upload_wrong_secret_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
-	if err != nil {
-		t.Fatal(err)
-	}
-	_,projects,err := service.ProjectOwn(Ts.URL,commonUserToken)
+	_, projects, err := service.ProjectOwn(Ts.URL+"/api", commonUserToken)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -365,51 +364,51 @@ func TestDownloadSelectively(t *testing.T){
 		t.Fatal(errors.New("Project Insert Abnormal"))
 	}
 	projectID := (*projects)[0].ID
-	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,projectNames[0],fileBytes.Docx)
-	if err != nil{
+	_, err = service.StorageUpload(Ts.URL+"/api", util.RandString(6), projectID, projectNames[0], fileBytes.Docx)
+	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,projectNames[1],fileBytes.Docx)
-	if err != nil{
-		t.Fatal(err)
-	}
-
-	_,err = service.StorageDownloadSelectively(Ts.URL,commonUserToken,projectID,"1")
+	_, err = service.StorageUpload(Ts.URL+"/api", util.RandString(6), projectID, projectNames[1], fileBytes.Docx)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_,err = service.StorageDownloadSelectively(Ts.URL,superUserToken,projectID,"A")
+	_, err = service.StorageDownloadSelectively(Ts.URL+"/api", commonUserToken, projectID, "1")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	ok,err := service.StorageDownloadSelectively(Ts.URL,commonUserToken2,projectID,"3")
-	if ok || ! strings.Contains(err.Error(),"Not Bytes Stream") {
+	_, err = service.StorageDownloadSelectively(Ts.URL+"/api", superUserToken, projectID, "A")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ok, err := service.StorageDownloadSelectively(Ts.URL+"/api", commonUserToken2, projectID, "3")
+	if ok || !strings.Contains(err.Error(), "Not Bytes Stream") {
 		t.Fatal("Storage Download Fail")
 	}
 }
 
-func TestRawFile(t *testing.T){
-	projectNames := []string{ "B11111111-陈陈陈-实验1.doc", "B11111112-陈陈-实验1.doc"}
-	_,superUserToken,err := service.AdminLogin(Ts.URL,SuperAdmin.Email,SuperAdmin.Password)
+func TestRawFile(t *testing.T) {
+	projectNames := []string{"B11111111-陈陈陈-实验1.doc", "B11111112-陈陈-实验1.doc"}
+	_, superUserToken, err := service.AdminLogin(Ts.URL+"/api", SuperAdmin.Email, SuperAdmin.Password)
 	if err != nil {
 		t.Fatal(err)
 	}
-	commonUserToken,err := generateAdmin()
+	commonUserToken, err := generateAdmin()
 	if err != nil {
 		t.Fatal(err)
 	}
-	commonUserToken2,err := generateAdmin()
+	commonUserToken2, err := generateAdmin()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_,err = service.ProjectInsert(Ts.URL,commonUserToken,"test_storage_upload_wrong_secret_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
+	_, err = service.ProjectInsert(Ts.URL+"/api", commonUserToken, "test_storage_upload_wrong_secret_"+util.RandString(6), "^B\\d{8}-.{2,4}-.{2}\\d$", []string{"doc"}, []string{"label1_" + util.RandString(4), "label2_" + util.RandString(4), "label3_" + util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,projects,err := service.ProjectOwn(Ts.URL,commonUserToken)
+	_, projects, err := service.ProjectOwn(Ts.URL+"/api", commonUserToken)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -417,27 +416,27 @@ func TestRawFile(t *testing.T){
 		t.Fatal(errors.New("Project Insert Abnormal"))
 	}
 	projectID := (*projects)[0].ID
-	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,projectNames[0],fileBytes.Docx)
-	if err != nil{
+	_, err = service.StorageUpload(Ts.URL+"/api", util.RandString(6), projectID, projectNames[0], fileBytes.Docx)
+	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,projectNames[1],fileBytes.Docx)
-	if err != nil{
-		t.Fatal(err)
-	}
-
-	_,err = service.StorageRawFile(Ts.URL,commonUserToken,projectID,projectNames[1])
+	_, err = service.StorageUpload(Ts.URL+"/api", util.RandString(6), projectID, projectNames[1], fileBytes.Docx)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_,err = service.StorageRawFile(Ts.URL,superUserToken,projectID,projectNames[0])
+	_, err = service.StorageRawFile(Ts.URL+"/api", commonUserToken, projectID, projectNames[1])
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	ok,err := service.StorageRawFile(Ts.URL,commonUserToken2,projectID,"NOT_FOUND_FILE.docx")
-	if ok || ! strings.Contains(err.Error(),"Not Bytes Stream") {
+	_, err = service.StorageRawFile(Ts.URL+"/api", superUserToken, projectID, projectNames[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ok, err := service.StorageRawFile(Ts.URL+"/api", commonUserToken2, projectID, "NOT_FOUND_FILE.docx")
+	if ok || !strings.Contains(err.Error(), "Not Bytes Stream") {
 		t.Fatal("Storage Download Fail")
 	}
 }

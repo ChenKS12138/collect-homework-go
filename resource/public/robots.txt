@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /api
+Disallow: /assets
+Disallow: /js
+Disallow: /css
+Crawl-delay: 10
+Host: https://homework.cattchen.top

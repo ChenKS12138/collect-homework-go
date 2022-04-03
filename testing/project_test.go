@@ -13,8 +13,8 @@ import (
 )
 
 // GET /project/
-func TestProjectList(t *testing.T){
-	_,_,err := service.ProjectList(Ts.URL)
+func TestProjectList(t *testing.T) {
+	_, _, err := service.ProjectList(Ts.URL + "/api")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -23,12 +23,12 @@ func TestProjectList(t *testing.T){
 
 // GET /project/
 // POST /project/insert
-func TestSuperAdminProjectInsert(t *testing.T){
-	_,token,err := service.AdminLogin(Ts.URL,SuperAdmin.Email,SuperAdmin.Password)
+func TestSuperAdminProjectInsert(t *testing.T) {
+	_, token, err := service.AdminLogin(Ts.URL+"/api", SuperAdmin.Email, SuperAdmin.Password)
 	if err != nil {
 		t.Fatal(err)
-	}	
-	_,err = service.ProjectInsert(Ts.URL,token,"superAdminInsertProject","\\w",[]string{"doc","docx"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4)})
+	}
+	_, err = service.ProjectInsert(Ts.URL+"/api", token, "superAdminInsertProject", "\\w", []string{"doc", "docx"}, []string{"label1_" + util.RandString(4), "label2_" + util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -37,13 +37,13 @@ func TestSuperAdminProjectInsert(t *testing.T){
 
 // GET /project/
 // POST /project/insert
-func TestCommonAdminProjectInsert(t *testing.T){
+func TestCommonAdminProjectInsert(t *testing.T) {
 	randomText := util.RandString(6)
-	_,token,err := service.AdminRegisterAndLogin(Ts.URL,"common_admin_project_insert_"+randomText+"@example.com","secret","commonAdminProjectInsert")
-	if err !=nil {
+	_, token, err := service.AdminRegisterAndLogin(Ts.URL+"/api", "common_admin_project_insert_"+randomText+"@example.com", "secret", "commonAdminProjectInsert")
+	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.ProjectInsert(Ts.URL,token,"commonAdminInsertProject","\\w",[]string{"doc","docx"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
+	_, err = service.ProjectInsert(Ts.URL+"/api", token, "commonAdminInsertProject", "\\w", []string{"doc", "docx"}, []string{"label1_" + util.RandString(4), "label2_" + util.RandString(4), "label3_" + util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -52,37 +52,37 @@ func TestCommonAdminProjectInsert(t *testing.T){
 
 // GET /own
 // 仅超级管理员可查看所有项目
-func TestProjectOwn(t *testing.T){
-	_,superUserToken,err := service.AdminLogin(Ts.URL,SuperAdmin.Email,SuperAdmin.Password)
+func TestProjectOwn(t *testing.T) {
+	_, superUserToken, err := service.AdminLogin(Ts.URL+"/api", SuperAdmin.Email, SuperAdmin.Password)
 	if err != nil {
 		t.Fatal(err)
 	}
-	commonUserProjectFileNameExample := "commonUserProject_filename_example"+util.RandString(10)
-	superUserProjectFileNameExample := "superUserProject_filename_example"+util.RandString(10)
+	commonUserProjectFileNameExample := "commonUserProject_filename_example" + util.RandString(10)
+	superUserProjectFileNameExample := "superUserProject_filename_example" + util.RandString(10)
 
-	commonUserToken,err := generateAdmin()
+	commonUserToken, err := generateAdmin()
 
-	_,err = service.ProjectInsert(Ts.URL,commonUserToken,commonUserProjectFileNameExample,"\\w",[]string{"doc","docx"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
+	_, err = service.ProjectInsert(Ts.URL+"/api", commonUserToken, commonUserProjectFileNameExample, "\\w", []string{"doc", "docx"}, []string{"label1_" + util.RandString(4), "label2_" + util.RandString(4), "label3_" + util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.ProjectInsert(Ts.URL,superUserToken,superUserProjectFileNameExample,"\\w",[]string{"doc","docx"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
+	_, err = service.ProjectInsert(Ts.URL+"/api", superUserToken, superUserProjectFileNameExample, "\\w", []string{"doc", "docx"}, []string{"label1_" + util.RandString(4), "label2_" + util.RandString(4), "label3_" + util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,commonUserProjectOwn,err := service.ProjectOwn(Ts.URL,commonUserToken)
-	if err !=nil {
+	_, commonUserProjectOwn, err := service.ProjectOwn(Ts.URL+"/api", commonUserToken)
+	if err != nil {
 		t.Fatal(err)
 	}
-	_,superUserProjectOwn,err := service.ProjectOwn(Ts.URL,superUserToken)
+	_, superUserProjectOwn, err := service.ProjectOwn(Ts.URL+"/api", superUserToken)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// test common user
 	testCommonUserOk := true
-	for _,project := range(*commonUserProjectOwn) {
-		if project.FileNameExample == superUserProjectFileNameExample  {
+	for _, project := range *commonUserProjectOwn {
+		if project.FileNameExample == superUserProjectFileNameExample {
 			testCommonUserOk = false
 		}
 	}
@@ -92,8 +92,8 @@ func TestProjectOwn(t *testing.T){
 
 	// test super user
 	testSuperUserOk := false
-	for _,project := range(*superUserProjectOwn){
-		if project.FileNameExample == commonUserProjectFileNameExample  {
+	for _, project := range *superUserProjectOwn {
+		if project.FileNameExample == commonUserProjectFileNameExample {
 			testSuperUserOk = true
 		}
 	}
@@ -104,27 +104,26 @@ func TestProjectOwn(t *testing.T){
 
 // POST /project/update
 // 超级管理员允许修改其他其他用户创建的project
-func TestProjectUpdate(t *testing.T){
-	
+func TestProjectUpdate(t *testing.T) {
 
-	_,superUserToken,err := service.AdminLogin(Ts.URL,SuperAdmin.Email,SuperAdmin.Password)
+	_, superUserToken, err := service.AdminLogin(Ts.URL+"/api", SuperAdmin.Email, SuperAdmin.Password)
 	if err != nil {
 		t.Fatal(err)
 	}
-	commonUserToken,err := generateAdmin()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	newFileNameExample := "test_project_update_filename_example"+util.RandString(6)
-	oldFileNameExample := "test_project_update_filename_example"+util.RandString(6)
-
-	_,err = service.ProjectInsert(Ts.URL,commonUserToken,oldFileNameExample,"\\w",[]string{"doc","docx"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
+	commonUserToken, err := generateAdmin()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_,projects,err := service.ProjectOwn(Ts.URL,commonUserToken)
+	newFileNameExample := "test_project_update_filename_example" + util.RandString(6)
+	oldFileNameExample := "test_project_update_filename_example" + util.RandString(6)
+
+	_, err = service.ProjectInsert(Ts.URL+"/api", commonUserToken, oldFileNameExample, "\\w", []string{"doc", "docx"}, []string{"label1_" + util.RandString(4), "label2_" + util.RandString(4), "label3_" + util.RandString(4)})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, projects, err := service.ProjectOwn(Ts.URL+"/api", commonUserToken)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -134,63 +133,63 @@ func TestProjectUpdate(t *testing.T){
 	targetProjectID := (*projects)[0].ID
 
 	// common user update project name
-	_,err = service.ProjectUpdateName(Ts.URL,commonUserToken,targetProjectID,newFileNameExample)
+	_, err = service.ProjectUpdateName(Ts.URL+"/api", commonUserToken, targetProjectID, newFileNameExample)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,projects,err = service.ProjectOwn(Ts.URL,commonUserToken)
+	_, projects, err = service.ProjectOwn(Ts.URL+"/api", commonUserToken)
 	commonUserUpdateProjectNameOk := false
-	for _,project := range(*projects){
+	for _, project := range *projects {
 		if project.ID == targetProjectID &&
 			project.FileNameExample == newFileNameExample {
-				commonUserUpdateProjectNameOk = true
-			}
+			commonUserUpdateProjectNameOk = true
+		}
 	}
 	if !commonUserUpdateProjectNameOk {
 		t.Fatal(errors.New("Common User Update Project Name Fail"))
 	}
 
 	// super user update project name
-	_,err = service.ProjectUpdateName(Ts.URL,superUserToken,targetProjectID,oldFileNameExample)
+	_, err = service.ProjectUpdateName(Ts.URL+"/api", superUserToken, targetProjectID, oldFileNameExample)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,projects,err = service.ProjectOwn(Ts.URL,superUserToken)
+	_, projects, err = service.ProjectOwn(Ts.URL+"/api", superUserToken)
 	superUserUpdateProjectNameOk := false
-	for _,project := range(*projects){
+	for _, project := range *projects {
 		if project.ID == targetProjectID &&
 			project.FileNameExample == oldFileNameExample {
-				superUserUpdateProjectNameOk = true
-			}
+			superUserUpdateProjectNameOk = true
+		}
 	}
 	if !superUserUpdateProjectNameOk {
 		t.Fatal(errors.New("Super User Update Project Name Fail"))
 	}
 }
 
-func TestProjectDelete(t *testing.T){
-	_,superUserToken,err := service.AdminLogin(Ts.URL,SuperAdmin.Email,SuperAdmin.Password)
+func TestProjectDelete(t *testing.T) {
+	_, superUserToken, err := service.AdminLogin(Ts.URL+"/api", SuperAdmin.Email, SuperAdmin.Password)
 	if err != nil {
 		t.Fatal(err)
 	}
-	commonUserToken,err := generateAdmin()
+	commonUserToken, err := generateAdmin()
 	if err != nil {
 		t.Fatal(err)
 	}
-	
-	fileNameExample1 := "common_user_delete_1_filename_example"+util.RandString(10)
-	fileNameExample2 := "common_user_delete_2_filename_example"+util.RandString(10)
+
+	fileNameExample1 := "common_user_delete_1_filename_example" + util.RandString(10)
+	fileNameExample2 := "common_user_delete_2_filename_example" + util.RandString(10)
 
 	// insert
-	_,err = service.ProjectInsert(Ts.URL,commonUserToken,fileNameExample1,"\\w",[]string{"doc","docx"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
+	_, err = service.ProjectInsert(Ts.URL+"/api", commonUserToken, fileNameExample1, "\\w", []string{"doc", "docx"}, []string{"label1_" + util.RandString(4), "label2_" + util.RandString(4), "label3_" + util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.ProjectInsert(Ts.URL,commonUserToken,fileNameExample2,"\\w",[]string{"doc","docx"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
+	_, err = service.ProjectInsert(Ts.URL+"/api", commonUserToken, fileNameExample2, "\\w", []string{"doc", "docx"}, []string{"label1_" + util.RandString(4), "label2_" + util.RandString(4), "label3_" + util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,projects,err := service.ProjectList(Ts.URL)
+	_, projects, err := service.ProjectList(Ts.URL + "/api")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -198,11 +197,11 @@ func TestProjectDelete(t *testing.T){
 	projectExist2 := false
 	projectID1 := ""
 	projectID2 := ""
-	for _,project := range(*projects){
+	for _, project := range *projects {
 		switch project.FileNameExample {
 		case fileNameExample1:
 			projectExist1 = true
-			projectID1= project.ID
+			projectID1 = project.ID
 		case fileNameExample2:
 			projectExist2 = true
 			projectID2 = project.ID
@@ -214,21 +213,21 @@ func TestProjectDelete(t *testing.T){
 	}
 
 	// delete
-	_,err = service.ProjectDelete(Ts.URL,commonUserToken,projectID1)
+	_, err = service.ProjectDelete(Ts.URL+"/api", commonUserToken, projectID1)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.ProjectDelete(Ts.URL,superUserToken,projectID2)
+	_, err = service.ProjectDelete(Ts.URL+"/api", superUserToken, projectID2)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_,projects,err = service.ProjectList(Ts.URL)
+	_, projects, err = service.ProjectList(Ts.URL + "/api")
 	if err != nil {
 		t.Fatal(err)
 	}
 	projectExist1 = false
 	projectExist2 = false
-	for _,project := range(*projects){
+	for _, project := range *projects {
 		switch project.Name {
 		case fileNameExample1:
 			projectExist1 = true
@@ -245,27 +244,26 @@ func TestProjectDelete(t *testing.T){
 	}
 }
 
+func TestProjectFileList(t *testing.T) {
+	projectNames := []string{"B11111111-陈陈陈-实验1.doc", "B11111112-陈陈-实验1.doc"}
+	_, superUserToken, err := service.AdminLogin(Ts.URL+"/api", SuperAdmin.Email, SuperAdmin.Password)
+	if err != nil {
+		t.Fatal(err)
+	}
+	commonUserToken, err := generateAdmin()
+	if err != nil {
+		t.Fatal(err)
+	}
+	commonUserToken2, err := generateAdmin()
+	if err != nil {
+		t.Fatal(err)
+	}
 
-func TestProjectFileList(t *testing.T){
-	projectNames := []string{ "B11111111-陈陈陈-实验1.doc", "B11111112-陈陈-实验1.doc"}
-	_,superUserToken,err := service.AdminLogin(Ts.URL,SuperAdmin.Email,SuperAdmin.Password)
+	_, err = service.ProjectInsert(Ts.URL+"/api", commonUserToken, "test_storage_upload_wrong_secret_"+util.RandString(6), "^B\\d{8}-.{2,4}-.{2}\\d$", []string{"doc"}, []string{"label1_" + util.RandString(4), "label2_" + util.RandString(4), "label3_" + util.RandString(4)})
 	if err != nil {
 		t.Fatal(err)
 	}
-	commonUserToken,err := generateAdmin()
-	if err != nil {
-		t.Fatal(err)
-	}
-	commonUserToken2,err := generateAdmin()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	_,err = service.ProjectInsert(Ts.URL,commonUserToken,"test_storage_upload_wrong_secret_"+util.RandString(6),"^B\\d{8}-.{2,4}-.{2}\\d$",[]string{"doc"},[]string{"label1_"+util.RandString(4),"label2_"+util.RandString(4),"label3_"+util.RandString(4)})
-	if err != nil {
-		t.Fatal(err)
-	}
-	_,projects,err := service.ProjectOwn(Ts.URL,commonUserToken)
+	_, projects, err := service.ProjectOwn(Ts.URL+"/api", commonUserToken)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -273,36 +271,36 @@ func TestProjectFileList(t *testing.T){
 		t.Fatal(errors.New("Project Insert Abnormal"))
 	}
 	projectID := (*projects)[0].ID
-	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,projectNames[0],fileBytes.Docx)
-	if err != nil{
+	_, err = service.StorageUpload(Ts.URL+"/api", util.RandString(6), projectID, projectNames[0], fileBytes.Docx)
+	if err != nil {
 		t.Fatal(err)
 	}
-	_,err = service.StorageUpload(Ts.URL,util.RandString(6),projectID,projectNames[1],fileBytes.Docx)
-	if err != nil{
+	_, err = service.StorageUpload(Ts.URL+"/api", util.RandString(6), projectID, projectNames[1], fileBytes.Docx)
+	if err != nil {
 		t.Fatal(err)
 	}
 
 	// common user
-	_,filelist,err := service.StorageFileList(Ts.URL,commonUserToken,projectID)
-	if filelist== nil || 
+	_, filelist, err := service.StorageFileList(Ts.URL+"/api", commonUserToken, projectID)
+	if filelist == nil ||
 		!collection.Collect(filelist).Contains(projectNames[0]) ||
-		!collection.Collect(filelist).Contains(projectNames[1]) || 
-		collection.Collect(filelist).Count()!=2 {
+		!collection.Collect(filelist).Contains(projectNames[1]) ||
+		collection.Collect(filelist).Count() != 2 {
 		t.Fatal(errors.New("Test Storage File List Fail (Common User)"))
 	}
 
 	// super user
-	_,filelist,err = service.StorageFileList(Ts.URL,superUserToken,projectID)
-	if filelist== nil || 
-	!collection.Collect(filelist).Contains(projectNames[0]) ||
-	!collection.Collect(filelist).Contains(projectNames[1]) || 
-	collection.Collect(filelist).Count()!=2 {
+	_, filelist, err = service.StorageFileList(Ts.URL+"/api", superUserToken, projectID)
+	if filelist == nil ||
+		!collection.Collect(filelist).Contains(projectNames[0]) ||
+		!collection.Collect(filelist).Contains(projectNames[1]) ||
+		collection.Collect(filelist).Count() != 2 {
 		t.Fatal(errors.New("Test Storage File List Fail (Super User)"))
 	}
 
 	// common user2
-	ok,_,err := service.StorageFileList(Ts.URL,commonUserToken2,projectID)
-	if ok || !strings.Contains(err.Error(),storage.ErrProjectPremissionDenied.ErrorText) {
+	ok, _, err := service.StorageFileList(Ts.URL+"/api", commonUserToken2, projectID)
+	if ok || !strings.Contains(err.Error(), storage.ErrProjectPremissionDenied.ErrorText) {
 		t.Fatal(errors.New("Test Storage File List Fail (Super User2)"))
 	}
 }

@@ -20,7 +20,7 @@ func Router() (*chi.Mux, error) {
 // generateCaptcha
 func generateCaptcha(w http.ResponseWriter, r *http.Request) {
 	img, str := util.CaptchaCap.Create(6, captcha.ALL)
-	secret := util.GenerateCapachaSecret()
+	secret := util.GenerateCaptchaSecret()
 	enc, err := util.Encrypt(secret, &str)
 	if err != nil {
 		panic(err)
